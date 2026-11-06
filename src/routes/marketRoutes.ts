@@ -5,19 +5,21 @@ import MarketDataService from '../services/marketDataService';
 const router = Router();
 
 /**
+ * GET /api/market/analysis
  * GET /api/market/analysis/:ticker
  * Retrieves full quantitative technical analysis report for an asset
  */
-router.get('/analysis/:ticker', async (req: Request, res: Response): Promise<void> => {
+const handleAnalysis = async (req: Request, res: Response): Promise<void> => {
   try {
-    const rawParam = req.params.ticker;
+    const rawParam = req.params.ticker || req.query.ticker;
     const rawTicker = Array.isArray(rawParam) ? rawParam[0] : (rawParam || '^NSEI');
-    const ticker = rawTicker.toUpperCase();
+    const ticker = String(rawTicker).toUpperCase();
     const report = await TAEngine.analyze(ticker);
 
     res.status(200).json({
       success: true,
       report,
+      ...report,
     });
   } catch (error: any) {
     console.error('[MarketRoutes] Error analyzing ticker:', error);
@@ -27,7 +29,10 @@ router.get('/analysis/:ticker', async (req: Request, res: Response): Promise<voi
       details: error.message,
     });
   }
-});
+};
+
+router.get('/analysis', handleAnalysis);
+router.get('/analysis/:ticker', handleAnalysis);
 
 /**
  * GET /api/market/candles/:ticker

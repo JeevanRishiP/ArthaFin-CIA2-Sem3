@@ -5,17 +5,15 @@ import FinanceService from '../services/financeService';
 const router = Router();
 
 /**
+ * GET /api/finance/overview
  * GET /api/finance/ledger/:userId
  * Retrieves aggregated monthly ledger and discretionary spending analysis
  */
-router.get('/ledger/:userId', async (req: Request, res: Response): Promise<void> => {
+const handleLedgerOverview = async (req: Request, res: Response): Promise<void> => {
   try {
-    const userIdStr = Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId;
-    const userIdNum = parseInt(userIdStr, 10);
-    if (isNaN(userIdNum)) {
-      res.status(400).json({ success: false, error: 'Invalid userId parameter.' });
-      return;
-    }
+    const rawUserId = req.params.userId || req.query.userId || '1';
+    const userIdStr = Array.isArray(rawUserId) ? rawUserId[0] : rawUserId;
+    const userIdNum = parseInt(String(userIdStr), 10) || 1;
 
     const month = req.query.month ? parseInt(String(req.query.month), 10) : undefined;
     const year = req.query.year ? parseInt(String(req.query.year), 10) : undefined;
@@ -24,6 +22,21 @@ router.get('/ledger/:userId', async (req: Request, res: Response): Promise<void>
 
     res.status(200).json({
       success: true,
+      period: ledger.period.label,
+      totalIncomePaise: ledger.metrics.totalIncomePaise,
+      totalExpensePaise: ledger.metrics.totalExpensesPaise,
+      netSavingsPaise: ledger.metrics.netSavingsPaise,
+      savingsRatePercent: ledger.metrics.savingsRatePercent,
+      expensesByCategory: ledger.categoryBreakdown.expenses.map((e) => ({
+        category: e.categoryName,
+        amountPaise: e.totalPaise,
+        percentOfTotal: e.percentageOfTotal,
+      })),
+      discretionaryOutflows: ledger.discretionarySpendingAlerts.map((d) => ({
+        category: d.categoryName,
+        amountPaise: Math.round(d.amount * 100),
+        percentOfTotalExpenses: d.percentageOfExpenses,
+      })),
       ledger,
     });
   } catch (error: any) {
@@ -31,6 +44,52 @@ router.get('/ledger/:userId', async (req: Request, res: Response): Promise<void>
     res.status(500).json({
       success: false,
       error: 'Failed to fetch financial ledger.',
+      details: error.message,
+    });
+  }
+};
+
+router.get('/overview', handleLedgerOverview);
+router.get('/ledger/:userId', handleLedgerOverview);
+
+/**
+ * GET /api/finance/transactions
+ * Retrieves transactions list for a user
+ */
+router.get('/transactions', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const rawUserId = req.query.userId || req.query.user_id || '1';
+    const userIdNum = parseInt(String(Array.isArray(rawUserId) ? rawUserId[0] : rawUserId), 10) || 1;
+
+    const result = await pool.query(
+      `SELECT t.id, t.user_id, t.category_id, t.amount, t.description, t.date, t.created_at,
+              c.name AS category_name, c.type AS category_type
+       FROM transactions t
+       JOIN categories c ON t.category_id = c.id
+       WHERE t.user_id = $1
+       ORDER BY t.date DESC, t.id DESC;`,
+      [userIdNum]
+    );
+
+    res.status(200).json({
+      success: true,
+      transactions: result.rows.map((r) => ({
+        id: r.id,
+        amount_paise: r.amount,
+        amount: Number((r.amount / 100).toFixed(2)),
+        category: r.category_name,
+        category_id: r.category_id,
+        type: r.category_type,
+        description: r.description,
+        date: r.date,
+        created_at: r.created_at,
+      })),
+    });
+  } catch (error: any) {
+    console.error('[FinanceRoutes] Error fetching transactions list:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch transactions.',
       details: error.message,
     });
   }
@@ -65,18 +124,24 @@ router.get('/categories', async (_req: Request, res: Response): Promise<void> =>
  */
 router.post('/transactions', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, category_id, amount, description, date } = req.body;
+    const { user_id, userId, category_id, category, amount, amountPaise, description, date } = req.body;
+    const uid = parseInt(String(user_id || userId || 1), 10);
 
-    if (!user_id || !category_id || amount == null || isNaN(Number(amount))) {
-      res.status(400).json({
-        success: false,
-        error: 'user_id, category_id, and numeric amount are required.',
-      });
+    let catId = category_id;
+    if (!catId && category) {
+      const catRes = await pool.query('SELECT id FROM categories WHERE LOWER(name) = $1 LIMIT 1', [String(category).toLowerCase()]);
+      if (catRes.rows.length > 0) {
+        catId = catRes.rows[0].id;
+      }
+    }
+    if (!catId) catId = 1; // Fallback to first category
+
+    let finalPaise = amountPaise != null ? Math.round(Number(amountPaise)) : Math.round(Number(amount || 0) * 100);
+    if (!finalPaise || isNaN(finalPaise)) {
+      res.status(400).json({ success: false, error: 'A valid transaction amount is required.' });
       return;
     }
 
-    // Convert decimal currency to integer paise (INR * 100)
-    const amountPaise = Math.round(Number(amount) * 100);
     const txDate = date || new Date().toISOString().split('T')[0];
 
     const insertQuery = `
@@ -86,9 +151,9 @@ router.post('/transactions', async (req: Request, res: Response): Promise<void> 
     `;
 
     const result = await pool.query(insertQuery, [
-      parseInt(String(user_id), 10),
-      category_id,
-      amountPaise,
+      uid,
+      catId,
+      finalPaise,
       description || '',
       txDate,
     ]);
@@ -97,7 +162,8 @@ router.post('/transactions', async (req: Request, res: Response): Promise<void> 
       success: true,
       transaction: {
         ...result.rows[0],
-        amount: Number((amountPaise / 100).toFixed(2)),
+        amount_paise: finalPaise,
+        amount: Number((finalPaise / 100).toFixed(2)),
       },
     });
   } catch (error: any) {
@@ -118,17 +184,21 @@ router.put('/transactions/:id', async (req: Request, res: Response): Promise<voi
   try {
     const rawId = req.params.id;
     const id = Array.isArray(rawId) ? rawId[0] : rawId;
-    const { category_id, amount, description, date } = req.body;
+    const { category_id, category, amount, amountPaise, description, date } = req.body;
 
-    if (!category_id || amount == null || isNaN(Number(amount))) {
-      res.status(400).json({
-        success: false,
-        error: 'category_id and numeric amount are required.',
-      });
+    let catId = category_id;
+    if (!catId && category) {
+      const catRes = await pool.query('SELECT id FROM categories WHERE LOWER(name) = $1 LIMIT 1', [String(category).toLowerCase()]);
+      if (catRes.rows.length > 0) catId = catRes.rows[0].id;
+    }
+    if (!catId) catId = 1;
+
+    let finalPaise = amountPaise != null ? Math.round(Number(amountPaise)) : Math.round(Number(amount || 0) * 100);
+    if (!finalPaise || isNaN(finalPaise)) {
+      res.status(400).json({ success: false, error: 'A valid numeric amount is required.' });
       return;
     }
 
-    const amountPaise = Math.round(Number(amount) * 100);
     const txDate = date || new Date().toISOString().split('T')[0];
 
     const updateQuery = `
@@ -143,8 +213,8 @@ router.put('/transactions/:id', async (req: Request, res: Response): Promise<voi
     `;
 
     const result = await pool.query(updateQuery, [
-      category_id,
-      amountPaise,
+      catId,
+      finalPaise,
       description || '',
       txDate,
       id,
@@ -159,7 +229,8 @@ router.put('/transactions/:id', async (req: Request, res: Response): Promise<voi
       success: true,
       transaction: {
         ...result.rows[0],
-        amount: Number((amountPaise / 100).toFixed(2)),
+        amount_paise: finalPaise,
+        amount: Number((finalPaise / 100).toFixed(2)),
       },
     });
   } catch (error: any) {
