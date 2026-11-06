@@ -307,7 +307,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!popup || popup.closed || typeof popup.closed === 'undefined') {
         // Popup blocked by browser: fallback to in-window redirect
         window.location.href = '/api/auth/google/start';
+        return;
       }
+
+      // Check for popup closure as fallback if postMessage was intercepted
+      const pollTimer = setInterval(async () => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          const token = localStorage.getItem('arthafin_token');
+          if (token && !currentUser.is_authenticated) {
+            await hydrateAuthSession();
+            closeAuthModal();
+            showToast(`Welcome back, ${currentUser.name || 'User'}!`);
+            await loadChatSessions();
+            if (activeView === 'view-finance') loadFinanceData();
+          }
+        }
+      }, 500);
     });
   }
 
@@ -324,6 +340,17 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadChatSessions();
         if (activeView === 'view-finance') loadFinanceData();
       }
+    }
+  });
+
+  // Listen for cross-tab or cross-window auth synchronization
+  window.addEventListener('storage', async (e) => {
+    if (e.key === 'arthafin_token' && e.newValue && !currentUser.is_authenticated) {
+      await hydrateAuthSession();
+      closeAuthModal();
+      showToast(`Welcome back, ${currentUser.name || 'User'}!`);
+      await loadChatSessions();
+      if (activeView === 'view-finance') loadFinanceData();
     }
   });
 
@@ -530,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.entries(workspaceViews).forEach(([id, el]) => {
       if (el) {
         if (id === targetViewId) {
-          el.style.display = 'block';
+          el.style.display = id === 'view-chat' ? 'flex' : 'block';
           el.classList.add('active');
         } else {
           el.style.display = 'none';

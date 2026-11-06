@@ -12,12 +12,15 @@
   --bg-input: #161822;
   --bg-user-bubble: #232636;
   --bg-modal: #14161f;
+  --bg-glass-panel: #14161f;
+  --bg-glass-card: #181a24;
 
   /* Borders */
   --border-subtle: #20222f;
   --border-card: #272a3a;
   --border-hover: #3a3e56;
   --border-focus: #38bdf8;
+  --border-glass: rgba(255, 255, 255, 0.08);
 
   /* Typography */
   --text-main: #f1f5f9;
@@ -28,9 +31,11 @@
 
   /* Accents */
   --accent-primary: #38bdf8;
+  --accent-cyan: #38bdf8;
   --accent-emerald: #10b981;
   --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #34d399 100%);
   --btn-gradient: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+  --btn-primary-gradient: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
 
   /* Shadows */
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -888,6 +893,10 @@ html, body {
   transition: transform 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
 }
 
+.send-action-btn svg {
+  pointer-events: none;
+}
+
 .send-action-btn:hover:not(:disabled) {
   transform: scale(1.05);
   background: #7dd3fc;
@@ -1618,9 +1627,21 @@ html, body {
 /* Workspace Views Container */
 .workspace-view {
   width: 100%;
-  height: calc(100vh - 65px);
-  overflow-y: auto;
+  height: calc(100vh - 56px);
   position: relative;
+}
+
+#view-chat.workspace-view {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: calc(100vh - 56px);
+}
+
+#view-market.workspace-view,
+#view-finance.workspace-view {
+  overflow-y: auto;
+  height: calc(100vh - 56px);
 }
 
 /* Dashboard Containers */
