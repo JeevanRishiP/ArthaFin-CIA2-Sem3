@@ -1,8 +1,8 @@
 // ==========================================================================
 // ArthaAI • Client Application Logic (Unified Multi-System Architecture)
-// 1. AI Financial Chatbot (with Persistent PostgreSQL History)
+// 1. AI Financial Chatbot (Multi-Session Isolated Conversation Management)
 // 2. AI-Based Stock Market Analysis & Prediction Engine
-// 3. AI-Powered Personal Finance & Wealth Ledger Management
+// 3. AI-Powered Personal Finance & Wealth Ledger (with Graphical Donut Chart)
 // ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,6 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
   const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
 
+  // --- DOM Elements: Sidebar Conversations (Like ChatGPT / Claude) ---
+  const sidebarSessionsList = document.getElementById('sidebar-sessions-list');
+  const sessionCountPill = document.getElementById('session-count-pill');
+  const newChatBtn = document.getElementById('new-chat-btn');
+  const clearChatBtn = document.getElementById('clear-chat-btn');
+  const syncHistoryBtn = document.getElementById('sync-history-btn');
+  const clearDbHistoryBtn = document.getElementById('clear-db-history-btn');
+
   // --- DOM Elements: View 1 (Chatbot) ---
   const chatForm = document.getElementById('chat-form');
   const messageInput = document.getElementById('message-input');
@@ -27,10 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const messagesContainer = document.getElementById('messages-container');
   const welcomeCard = document.getElementById('welcome-card');
   const typingIndicator = document.getElementById('typing-indicator');
-  const clearChatBtn = document.getElementById('clear-chat-btn');
-  const newChatBtn = document.getElementById('new-chat-btn');
-  const syncHistoryBtn = document.getElementById('sync-history-btn');
-  const clearDbHistoryBtn = document.getElementById('clear-db-history-btn');
 
   // --- DOM Elements: View 2 (Stock Market) ---
   const marketAsOfBadge = document.getElementById('market-as-of-badge');
@@ -65,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const finSavingsRate = document.getElementById('fin-savings-rate');
   const finRateStatus = document.getElementById('fin-rate-status');
   const finSavingsBar = document.getElementById('fin-savings-bar');
+  const financePieChartContainer = document.getElementById('finance-pie-chart-container');
+  const financePieLegend = document.getElementById('finance-pie-legend');
   const discretionaryAlertsList = document.getElementById('discretionary-alerts-list');
   const categoryBarsList = document.getElementById('category-bars-list');
   const financeTransactionsTbody = document.getElementById('finance-transactions-tbody');
@@ -73,32 +79,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const askFinanceAiBtn = document.getElementById('ask-finance-ai-btn');
   const txModal = document.getElementById('tx-modal');
   const txModalClose = document.getElementById('tx-modal-close');
+  const txModalHeading = document.getElementById('tx-modal-heading');
+  const txModalSubheading = document.getElementById('tx-modal-subheading');
   const addTransactionForm = document.getElementById('add-transaction-form');
+  const txEditId = document.getElementById('tx-edit-id');
   const txAmount = document.getElementById('tx-amount');
   const txCategory = document.getElementById('tx-category');
   const txDescription = document.getElementById('tx-description');
   const txDate = document.getElementById('tx-date');
+  const saveTxBtn = document.getElementById('save-tx-btn');
 
   // --- State Variables ---
-  const activeUserId = 1; // Primary active user ID
+  const activeUserId = 1; // Primary active user ID (Rohan Sharma)
+  let activeSessionId = null; // Currently active conversation thread (null = fresh consultation)
   let currentTicker = '^NSEI';
   let isAwaitingResponse = false;
   let activeView = 'view-chat';
+  const transactionsCache = new Map(); // Store transactions by ID for fast editing lookup
+
+  // Vibrant Palette for VisionOS Glass Donut Chart
+  const DONUT_COLORS = [
+    '#38bdf8', // Neon Sky Blue
+    '#818cf8', // Electric Indigo
+    '#f43f5e', // Vibrant Rose
+    '#f59e0b', // Radiant Amber
+    '#10b981', // Crisp Emerald
+    '#06b6d4', // Bright Teal
+    '#a855f7', // Mystic Purple
+    '#ec4899', // Pink Fuchsia
+    '#6366f1', // Ultra Violet
+    '#14b8a6', // Deep Cyan
+  ];
 
   // ==========================================================================
-  // INITIALIZATION: Load Persistent Chat History Immediately
+  // INITIALIZATION
   // ==========================================================================
   initApplication();
 
   async function initApplication() {
-    console.log('🚀 Initializing ArthaAI Unified Dashboard...');
-    // Set default date for transaction modal
+    console.log('🚀 Initializing ArthaAI Unified Intelligence System...');
     if (txDate) txDate.value = new Date().toISOString().split('T')[0];
 
-    // Load persistent chat history from PostgreSQL immediately on launch
-    await loadUserHistory(activeUserId);
+    // 1. Load Past Conversation Sessions from PostgreSQL into Sidebar Locks
+    await loadChatSessions();
 
-    // Populate category dropdown
+    // 2. Pre-load Transaction Categories for Modal
     loadCategories();
   }
 
@@ -109,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!workspaceViews[targetViewId]) return;
     activeView = targetViewId;
 
-    // Toggle active state on tabs
     navTabs.forEach((tab) => {
       tab.classList.toggle('active', tab.getAttribute('data-view') === targetViewId);
     });
@@ -118,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.toggle('active', btn.getAttribute('data-view') === targetViewId);
     });
 
-    // Show selected view, hide others
     Object.keys(workspaceViews).forEach((viewId) => {
       const el = workspaceViews[viewId];
       if (el) {
@@ -132,12 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Close mobile sidebar
     if (window.innerWidth <= 900 && sidebar) {
       sidebar.classList.remove('open');
     }
 
-    // Trigger on-demand data loads
     if (targetViewId === 'view-market') {
       loadMarketData(currentTicker);
     } else if (targetViewId === 'view-finance') {
@@ -153,14 +174,200 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => switchView(btn.getAttribute('data-view')));
   });
 
-  // Mobile sidebar controls
   sidebarToggleBtn.addEventListener('click', () => sidebar.classList.toggle('open'));
   if (sidebarCloseBtn) {
     sidebarCloseBtn.addEventListener('click', () => sidebar.classList.remove('open'));
   }
 
   // ==========================================================================
-  // FEATURE 1: AI-POWERED FINANCIAL CHATBOT (PERSISTENT CONVERSATION HISTORY)
+  // MULTI-SESSION CONVERSATION MANAGEMENT (Like ChatGPT / Claude / Gemini)
+  // ==========================================================================
+
+  /**
+   * Fetches all conversation sessions from PostgreSQL and populates the sidebar
+   */
+  async function loadChatSessions() {
+    try {
+      const res = await fetch(`/api/chat/sessions/${activeUserId}`);
+      const data = await res.json();
+
+      if (!data.success || !Array.isArray(data.sessions)) {
+        sidebarSessionsList.innerHTML = '<div class="sidebar-empty-sessions">Could not load past consultations.</div>';
+        return;
+      }
+
+      sessionCountPill.textContent = data.sessions.length;
+      sidebarSessionsList.innerHTML = '';
+
+      if (data.sessions.length === 0) {
+        sidebarSessionsList.innerHTML = '<div class="sidebar-empty-sessions">No previous consultations saved yet.</div>';
+        if (!activeSessionId) {
+          showWelcomeCard();
+        }
+        return;
+      }
+
+      data.sessions.forEach((session) => {
+        const item = document.createElement('div');
+        const isActive = activeSessionId === session.id;
+        item.className = `session-lock-item ${isActive ? 'active' : ''}`;
+        item.setAttribute('data-session-id', session.id);
+
+        item.innerHTML = `
+          <div class="session-info">
+            <span class="session-icon">💬</span>
+            <div class="session-meta">
+              <span class="session-title-text" title="${escapeHtml(session.title)}">${escapeHtml(session.title)}</span>
+              <span class="session-date-text">${formatSessionDate(session.updated_at || session.created_at)}</span>
+            </div>
+          </div>
+          <button class="session-delete-btn" data-delete-id="${session.id}" title="Delete consultation">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        `;
+
+        // Switch to session when clicking item body
+        item.addEventListener('click', (e) => {
+          if (e.target.closest('.session-delete-btn')) return;
+          switchSession(session.id);
+        });
+
+        // Delete button inside session item
+        const deleteBtn = item.querySelector('.session-delete-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteSession(session.id);
+        });
+
+        sidebarSessionsList.appendChild(item);
+      });
+
+      // If no active session yet, load the latest conversation thread
+      if (!activeSessionId && data.sessions.length > 0) {
+        switchSession(data.sessions[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading chat sessions:', err);
+      sidebarSessionsList.innerHTML = '<div class="sidebar-empty-sessions">Error connecting to session store.</div>';
+    }
+  }
+
+  /**
+   * Switches to an existing conversation thread and restores its messages
+   */
+  async function switchSession(sessionId) {
+    activeSessionId = sessionId;
+    switchView('view-chat');
+
+    // Update active highlight in sidebar
+    document.querySelectorAll('.session-lock-item').forEach((item) => {
+      item.classList.toggle('active', item.getAttribute('data-session-id') === sessionId);
+    });
+
+    try {
+      setLoadingState(true);
+      const res = await fetch(`/api/chat/sessions/${sessionId}/messages`);
+      const data = await res.json();
+
+      messagesContainer.innerHTML = '';
+
+      if (data.success && Array.isArray(data.messages) && data.messages.length > 0) {
+        if (welcomeCard) welcomeCard.style.display = 'none';
+        data.messages.forEach((msg) => {
+          const sender = msg.role === 'user' ? 'You' : 'ArthaAI Advisor';
+          appendMessageEnvelope(msg.role, msg.message_content, msg.timestamp, sender);
+        });
+      } else {
+        showWelcomeCard();
+      }
+    } catch (err) {
+      console.error('Failed to load session messages:', err);
+      showWelcomeCard();
+    } finally {
+      setLoadingState(false);
+    }
+  }
+
+  /**
+   * Starts a brand new conversation entirely from zero (ChatGPT / Claude style)
+   */
+  function startNewConsultation() {
+    activeSessionId = null;
+    switchView('view-chat');
+
+    // Clear active highlights in sidebar
+    document.querySelectorAll('.session-lock-item').forEach((item) => {
+      item.classList.remove('active');
+    });
+
+    // Clear current chat container and show welcome card with middle suggestions
+    messagesContainer.innerHTML = '';
+    showWelcomeCard();
+    messageInput.value = '';
+    messageInput.focus();
+    console.log('✨ Started new consultation thread from zero.');
+  }
+
+  function showWelcomeCard() {
+    if (welcomeCard) {
+      welcomeCard.style.display = 'flex';
+      messagesContainer.appendChild(welcomeCard);
+    }
+  }
+
+  /**
+   * Permanently deletes a single conversation session from PostgreSQL
+   */
+  async function deleteSession(sessionId) {
+    if (!confirm('Are you sure you want to delete this consultation thread?')) return;
+    try {
+      const res = await fetch(`/api/chat/sessions/${sessionId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        if (activeSessionId === sessionId) {
+          startNewConsultation();
+        }
+        await loadChatSessions();
+      } else {
+        alert(data.error || 'Failed to delete session.');
+      }
+    } catch (err) {
+      console.error('Failed to delete session:', err);
+      alert('Error communicating with server.');
+    }
+  }
+
+  // Top and sidebar "New Consultation" triggers
+  newChatBtn.addEventListener('click', startNewConsultation);
+  clearChatBtn.addEventListener('click', startNewConsultation);
+
+  // Sync button reloads sessions
+  syncHistoryBtn.addEventListener('click', () => {
+    loadChatSessions();
+    if (activeSessionId) {
+      switchSession(activeSessionId);
+    }
+  });
+
+  // Clear All DB History permanently
+  clearDbHistoryBtn.addEventListener('click', async () => {
+    if (!confirm('Are you sure you want to permanently clear ALL saved consultations from PostgreSQL?')) {
+      return;
+    }
+    try {
+      await fetch(`/api/chat/history/${activeUserId}`, { method: 'DELETE' });
+      startNewConsultation();
+      await loadChatSessions();
+    } catch (err) {
+      console.error('Failed to clear database history:', err);
+    }
+  });
+
+  // ==========================================================================
+  // FEATURE 1: AI-POWERED FINANCIAL CHATBOT (RAG + CONTEXT INJECTION)
   // ==========================================================================
 
   // Auto-resize textarea
@@ -187,19 +394,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (welcomeCard) welcomeCard.style.display = 'none';
 
-    // 1. Immediately append user message to DOM
+    // 1. Immediately append user message to UI
     appendMessageEnvelope('user', query, new Date().toISOString(), 'You');
     messageInput.value = '';
     messageInput.style.height = 'auto';
     setLoadingState(true);
 
     try {
-      // 2. Dispatch query to backend controller (saves to PostgreSQL chat_history)
+      // 2. Dispatch query to backend controller with session_id
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: activeUserId,
+          session_id: activeSessionId, // Links message strictly to current thread
           message: query,
         }),
       });
@@ -210,8 +418,15 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.error || 'Failed to communicate with AI Advisor.');
       }
 
+      // Update model badge if present
       if (data.model_used && activeModelName) {
         activeModelName.textContent = data.model_used.replace('models/', '');
+      }
+
+      // If a new session was created on the backend, update our activeSessionId and refresh sidebar
+      const wasFreshThread = !activeSessionId;
+      if (data.session_id) {
+        activeSessionId = data.session_id;
       }
 
       // 3. Append assistant response
@@ -222,6 +437,11 @@ document.addEventListener('DOMContentLoaded', () => {
         'ArthaAI Advisor',
         data.intent
       );
+
+      // Refresh sidebar list so new consultation appears or title updates
+      if (wasFreshThread) {
+        await loadChatSessions();
+      }
     } catch (err) {
       appendMessageEnvelope(
         'assistant',
@@ -253,9 +473,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let intentBadgeHtml = '';
     if (intent === 'MARKET') {
-      intentBadgeHtml = '<span class="status-chip active" style="margin-left: 8px;">📈 Market Analysis</span>';
+      intentBadgeHtml = '<span class="status-chip active" style="margin-left: 8px;">📈 Market Structure</span>';
     } else if (intent === 'FINANCE') {
-      intentBadgeHtml = '<span class="status-chip warning" style="margin-left: 8px;">💳 Finance Ledger</span>';
+      intentBadgeHtml = '<span class="status-chip warning" style="margin-left: 8px;">💳 Ledger Audit</span>';
     }
 
     header.innerHTML = `
@@ -276,77 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollToBottom();
   }
 
-  // Load chat history from PostgreSQL
-  async function loadUserHistory(userId) {
-    try {
-      setLoadingState(true);
-      const res = await fetch(`/api/chat/history/${userId}`);
-      const data = await res.json();
-
-      messagesContainer.innerHTML = '';
-
-      if (data.success && Array.isArray(data.history) && data.history.length > 0) {
-        if (welcomeCard) welcomeCard.style.display = 'none';
-        data.history.forEach((item) => {
-          const sender = item.role === 'user' ? 'You' : 'ArthaAI Advisor';
-          appendMessageEnvelope(item.role, item.message_content, item.timestamp, sender);
-        });
-        console.log(`✅ Loaded ${data.history.length} saved conversation messages from PostgreSQL.`);
-      } else {
-        if (welcomeCard) {
-          welcomeCard.style.display = 'flex';
-          messagesContainer.appendChild(welcomeCard);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load persistent history:', err);
-    } finally {
-      setLoadingState(false);
-    }
-  }
-
-  // Reload history manually
-  syncHistoryBtn.addEventListener('click', () => {
-    loadUserHistory(activeUserId);
-  });
-
-  // Clear Database History permanently
-  clearDbHistoryBtn.addEventListener('click', async () => {
-    if (!confirm('Are you sure you want to permanently clear all saved chat history from PostgreSQL?')) {
-      return;
-    }
-    try {
-      await fetch(`/api/chat/history/${activeUserId}`, { method: 'DELETE' });
-      messagesContainer.innerHTML = '';
-      if (welcomeCard) {
-        welcomeCard.style.display = 'flex';
-        messagesContainer.appendChild(welcomeCard);
-      }
-    } catch (err) {
-      console.error('Failed to clear database history:', err);
-    }
-  });
-
-  // Clear current view
-  clearChatBtn.addEventListener('click', () => {
-    messagesContainer.innerHTML = '';
-    if (welcomeCard) {
-      welcomeCard.style.display = 'flex';
-      messagesContainer.appendChild(welcomeCard);
-    }
-  });
-
-  newChatBtn.addEventListener('click', () => {
-    switchView('view-chat');
-    messagesContainer.innerHTML = '';
-    if (welcomeCard) {
-      welcomeCard.style.display = 'flex';
-      messagesContainer.appendChild(welcomeCard);
-    }
-    messageInput.focus();
-  });
-
-  // Clickable Prompt Chips
+  // Clickable Middle Suggestion Cards (Moved to Center of New Conversation Page)
   document.querySelectorAll('.prompt-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       const prompt = chip.getAttribute('data-prompt');
@@ -406,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isUs = ticker === '^GSPC';
       const currencySymbol = isUs ? '$' : '₹';
 
-      // 1. Fetch Quantitative Technical Analysis Report
+      // 1. Fetch Technical Analysis Report
       const analysisRes = await fetch(`/api/market/analysis/${encodeURIComponent(ticker)}`);
       const analysisData = await analysisRes.json();
 
@@ -511,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // FEATURE 3: AI-POWERED PERSONAL FINANCE & WEALTH LEDGER MANAGEMENT
+  // FEATURE 3: AI-POWERED PERSONAL FINANCE (LEDGER, PIE CHART & TRANSACTION EDIT)
   // ==========================================================================
   askFinanceAiBtn.addEventListener('click', () => {
     const prompt = 'Analyze my monthly personal finance ledger. How much did I spend, what is my current savings rate, and what are your strict recommendations to cut discretionary leaks and save more?';
@@ -521,12 +671,26 @@ document.addEventListener('DOMContentLoaded', () => {
     chatForm.dispatchEvent(new Event('submit', { cancelable: true }));
   });
 
+  // Open modal in "Add" mode
   openAddTxModalBtn.addEventListener('click', () => {
+    txEditId.value = '';
+    addTransactionForm.reset();
+    if (txDate) txDate.value = new Date().toISOString().split('T')[0];
+    txModalHeading.textContent = 'Add Personal Transaction';
+    txModalSubheading.textContent = 'Recorded into PostgreSQL with integer paise precision';
+    saveTxBtn.innerHTML = '<span>Save Transaction</span>';
     txModal.style.display = 'flex';
   });
 
   txModalClose.addEventListener('click', () => {
     txModal.style.display = 'none';
+  });
+
+  // Close modal on backdrop click
+  txModal.addEventListener('click', (e) => {
+    if (e.target === txModal) {
+      txModal.style.display = 'none';
+    }
   });
 
   async function loadCategories() {
@@ -547,45 +711,84 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Open modal in "Edit" mode
+  function openEditTxModal(txId) {
+    const tx = transactionsCache.get(txId);
+    if (!tx) return;
+
+    txEditId.value = tx.id;
+    txAmount.value = tx.amount;
+    txCategory.value = tx.categoryId || '';
+    txDescription.value = tx.description;
+    txDate.value = tx.date;
+
+    txModalHeading.textContent = 'Edit Personal Transaction';
+    txModalSubheading.textContent = 'Update transaction record in PostgreSQL';
+    saveTxBtn.innerHTML = '<span>Update Transaction</span>';
+    txModal.style.display = 'flex';
+  }
+
+  // Add / Edit Form submission
   addTransactionForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const isEditing = Boolean(txEditId.value);
     const amountVal = parseFloat(txAmount.value);
     const catId = txCategory.value;
     const desc = txDescription.value.trim();
     const dateVal = txDate.value;
 
-    if (!amountVal || !catId || !desc) return;
+    if (!amountVal || !catId || !desc) {
+      alert('Please fill in all required fields.');
+      return;
+    }
 
     try {
-      const btn = document.getElementById('save-tx-btn');
-      btn.disabled = true;
-      btn.textContent = 'Saving to PostgreSQL...';
+      saveTxBtn.disabled = true;
+      saveTxBtn.innerHTML = isEditing ? '<span>Updating PostgreSQL...</span>' : '<span>Saving to PostgreSQL...</span>';
 
-      const res = await fetch('/api/finance/transactions', {
-        method: 'POST',
+      const url = isEditing
+        ? `/api/finance/transactions/${encodeURIComponent(txEditId.value)}`
+        : '/api/finance/transactions';
+
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const bodyPayload = isEditing
+        ? {
+            category_id: catId,
+            amount: amountVal,
+            description: desc,
+            date: dateVal,
+          }
+        : {
+            user_id: activeUserId,
+            category_id: catId,
+            amount: amountVal,
+            description: desc,
+            date: dateVal,
+          };
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: activeUserId,
-          category_id: catId,
-          amount: amountVal,
-          description: desc,
-          date: dateVal,
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await res.json();
-      btn.disabled = false;
-      btn.textContent = 'Save Transaction to PostgreSQL';
+      saveTxBtn.disabled = false;
+      saveTxBtn.innerHTML = isEditing ? '<span>Update Transaction</span>' : '<span>Save Transaction</span>';
 
       if (data.success) {
         txModal.style.display = 'none';
+        txEditId.value = '';
         addTransactionForm.reset();
         if (txDate) txDate.value = new Date().toISOString().split('T')[0];
         await loadFinanceData();
       } else {
-        alert(data.error || 'Failed to save transaction.');
+        alert(data.error || 'Failed to persist transaction.');
       }
     } catch (err) {
+      saveTxBtn.disabled = false;
+      saveTxBtn.innerHTML = '<span>Save Transaction</span>';
       alert('Network error saving transaction.');
     }
   });
@@ -615,7 +818,10 @@ document.addEventListener('DOMContentLoaded', () => {
         finRateStatus.textContent = 'Low (<20%)';
       }
 
-      // Render Discretionary Spending Alert Boxes
+      // 1. Render Graphical Donut / Pie Chart & Interactive Legend
+      renderExpenseDonutChart(l.categoryBreakdown.expenses || [], l.metrics.totalExpenses);
+
+      // 2. Render Discretionary Spending Alert Boxes
       discretionaryAlertsList.innerHTML = '';
       if (l.discretionarySpendingAlerts && l.discretionarySpendingAlerts.length > 0) {
         l.discretionarySpendingAlerts.forEach((alertItem) => {
@@ -632,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         discretionaryAlertsList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No severe discretionary spending leaks found for this cycle.</p>';
       }
 
-      // Render Category Progress Bars
+      // 3. Render Category Progress Bars
       categoryBarsList.innerHTML = '';
       if (l.categoryBreakdown.expenses && l.categoryBreakdown.expenses.length > 0) {
         l.categoryBreakdown.expenses.forEach((cat) => {
@@ -651,15 +857,100 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // Render Transactions Table
+      // 4. Render Transactions Table with Edit & Delete Options
       renderTransactionsTable(l.recentTransactions || []);
     } catch (err) {
       console.error('Finance ledger load error:', err);
     }
   }
 
+  /**
+   * Renders a responsive, mathematically precise SVG Donut Chart with glowing VisionOS segments
+   */
+  function renderExpenseDonutChart(expenses, totalExpenses) {
+    if (!financePieChartContainer || !financePieLegend) return;
+
+    financePieChartContainer.innerHTML = '';
+    financePieLegend.innerHTML = '';
+
+    if (!expenses || expenses.length === 0 || totalExpenses <= 0) {
+      financePieChartContainer.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100%; color: var(--text-muted);">
+          <span style="font-size: 2rem; margin-bottom: 8px;">📊</span>
+          <span style="font-size: 0.82rem;">No expense outflows recorded for this period.</span>
+        </div>
+      `;
+      financePieLegend.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Add expenses to visualize category distribution.</div>';
+      return;
+    }
+
+    // Geometry of SVG Donut
+    const r = 54; // radius
+    const circumference = 2 * Math.PI * r; // ~339.292
+
+    let accumulatedOffset = 0;
+    const circlesSvg = expenses.map((cat, idx) => {
+      const color = DONUT_COLORS[idx % DONUT_COLORS.length];
+      const fraction = cat.totalAmount / totalExpenses;
+      const dashLength = fraction * circumference;
+      const strokeOffset = -accumulatedOffset;
+      accumulatedOffset += dashLength;
+
+      return `
+        <circle
+          class="donut-segment"
+          cx="80"
+          cy="80"
+          r="${r}"
+          stroke="${color}"
+          stroke-dasharray="${dashLength.toFixed(2)} ${(circumference - dashLength).toFixed(2)}"
+          stroke-dashoffset="${strokeOffset.toFixed(2)}"
+        >
+          <title>${escapeHtml(cat.categoryName)}: ₹${cat.totalAmount.toLocaleString('en-IN')} (${cat.percentageOfTotal}%)</title>
+        </circle>
+      `;
+    }).join('');
+
+    // Inject SVG and centered metrics
+    financePieChartContainer.innerHTML = `
+      <svg class="pie-donut-svg" viewBox="0 0 160 160">
+        <!-- Background track -->
+        <circle cx="80" cy="80" r="${r}" stroke="rgba(255, 255, 255, 0.05)" stroke-width="22" fill="none" />
+        <!-- Colored Segments -->
+        ${circlesSvg}
+      </svg>
+      <div class="donut-center-info">
+        <span class="donut-center-label">Total Outflow</span>
+        <span class="donut-center-value">₹${totalExpenses.toLocaleString('en-IN')}</span>
+        <span class="donut-center-sub">${expenses.length} Categories</span>
+      </div>
+    `;
+
+    // Render Legend Items Grid
+    expenses.forEach((cat, idx) => {
+      const color = DONUT_COLORS[idx % DONUT_COLORS.length];
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = `
+        <div class="legend-left">
+          <span class="legend-color-dot" style="background-color: ${color}; color: ${color};"></span>
+          <span class="legend-name" title="${escapeHtml(cat.categoryName)}">${escapeHtml(cat.categoryName)}</span>
+        </div>
+        <div class="legend-right">
+          <span class="legend-amount">₹${cat.totalAmount.toLocaleString('en-IN')}</span>
+          <span class="legend-pct">${cat.percentageOfTotal}%</span>
+        </div>
+      `;
+      financePieLegend.appendChild(item);
+    });
+  }
+
+  /**
+   * Renders the transactions table with Edit and Delete capabilities
+   */
   function renderTransactionsTable(transactions) {
     financeTransactionsTbody.innerHTML = '';
+    transactionsCache.clear();
     txCountBadge.textContent = `${transactions.length} Records`;
 
     if (!transactions || transactions.length === 0) {
@@ -668,6 +959,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     transactions.forEach((t) => {
+      transactionsCache.set(t.id, t);
       const tr = document.createElement('tr');
       const isIncome = t.categoryType === 'income';
       const badgeStyle = isIncome ? 'background: rgba(16, 185, 129, 0.2); color: #34d399;' : 'background: rgba(239, 68, 68, 0.2); color: #f87171;';
@@ -680,21 +972,34 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${isIncome ? 'Income' : 'Expense'}</td>
         <td style="${amountStyle}">${isIncome ? '+' : '-'}₹${t.amount.toLocaleString('en-IN')}</td>
         <td>
-          <button class="glass-action-pill danger delete-tx-btn" data-id="${t.id}" style="padding: 4px 8px; font-size: 0.72rem;">
-            Delete
-          </button>
+          <div class="table-action-group">
+            <button class="edit-tx-btn" data-edit-id="${t.id}" title="Edit transaction">
+              ✏️ Edit
+            </button>
+            <button class="glass-action-pill danger delete-tx-btn" data-id="${t.id}" style="padding: 4px 8px; font-size: 0.72rem;">
+              Delete
+            </button>
+          </div>
         </td>
       `;
       financeTransactionsTbody.appendChild(tr);
     });
 
-    // Delete transaction handler
+    // Wire up Edit buttons
+    document.querySelectorAll('.edit-tx-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.currentTarget).getAttribute('data-edit-id');
+        if (id) openEditTxModal(id);
+      });
+    });
+
+    // Wire up Delete buttons
     document.querySelectorAll('.delete-tx-btn').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         const id = (e.currentTarget).getAttribute('data-id');
         if (!id || !confirm('Delete this transaction?')) return;
         try {
-          await fetch(`/api/finance/transactions/${id}`, { method: 'DELETE' });
+          await fetch(`/api/finance/transactions/${encodeURIComponent(id)}`, { method: 'DELETE' });
           await loadFinanceData();
         } catch (err) {
           alert('Could not delete transaction.');
@@ -719,9 +1024,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function formatSessionDate(isoStr) {
+    try {
+      const d = isoStr ? new Date(isoStr) : new Date();
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      if (isToday) {
+        return `Today, ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      }
+      return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    } catch {
+      return '';
+    }
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
-    return str
+    return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')

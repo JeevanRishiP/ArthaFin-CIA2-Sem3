@@ -36,3 +36,4 @@ BEGIN
         WHERE user_id = u_id AND session_id IS NULL;
     END LOOP;
 END $$;
+
