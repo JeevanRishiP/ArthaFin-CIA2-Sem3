@@ -10,7 +10,7 @@
     "db:init": "ts-node src/db/migrate.ts",
     "db:seed": "ts-node src/db/seed.ts",
     "db:seed:unified": "ts-node src/db/seeds/unified_seed.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ts-node tests/api.test.ts"
   },
   "keywords": [],
   "author": "",
