@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ArthaAI • Financial Intelligence System</title>
+  <title>ArthaAI • Intelligent Financial Advisor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="linear-dark-theme">
+<body class="claude-dark-theme">
   <div class="app-shell">
-    <!-- Left Apple Glass Sidebar -->
-    <aside class="glass-sidebar" id="sidebar">
+    <!-- Left Sidebar (Claude / Gemini Style) -->
+    <aside class="app-sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="brand">
-          <div class="brand-sparkle-halo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#brand-sparkle-grad)"/>
+          <div class="brand-sparkle-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#brand-gemini-grad)"/>
               <defs>
-                <linearGradient id="brand-sparkle-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <linearGradient id="brand-gemini-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
                   <stop stop-color="#38bdf8"/>
                   <stop offset="0.5" stop-color="#818cf8"/>
                   <stop offset="1" stop-color="#34d399"/>
@@ -27,13 +27,13 @@
               </defs>
             </svg>
           </div>
-          <div class="brand-names">
+          <div class="brand-meta">
             <h2>ArthaAI</h2>
             <span>Financial Intelligence</span>
           </div>
         </div>
 
-        <button id="sidebar-close-btn" class="glass-icon-btn mobile-only" title="Close Sidebar">
+        <button id="sidebar-close-btn" class="icon-btn mobile-only" title="Close Sidebar">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -41,36 +41,8 @@
         </button>
       </div>
 
-      <!-- Navigation System Switcher in Sidebar -->
-      <div class="sidebar-mode-switcher">
-        <div class="section-title">Core Systems</div>
-        <div class="mode-nav-list">
-          <button class="mode-nav-btn active" data-view="view-chat">
-            <span class="mode-icon">💬</span>
-            <div class="mode-meta">
-              <strong>AI Financial Chatbot</strong>
-              <span>Planning, Loans, Budgeting</span>
-            </div>
-          </button>
-          <button class="mode-nav-btn" data-view="view-market">
-            <span class="mode-icon">📈</span>
-            <div class="mode-meta">
-              <strong>Stock Market Engine</strong>
-              <span>SMA Crossover, BoS & FVGs</span>
-            </div>
-          </button>
-          <button class="mode-nav-btn" data-view="view-finance">
-            <span class="mode-icon">💳</span>
-            <div class="mode-meta">
-              <strong>Personal Finance</strong>
-              <span>Ledger & Savings Optimizer</span>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- New Chat Action -->
-      <button id="new-chat-btn" class="glass-new-chat-btn">
+      <!-- New Consultation Button -->
+      <button id="new-chat-btn" class="new-chat-btn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -78,523 +50,408 @@
         <span>New Consultation</span>
       </button>
 
-      <!-- Previous Conversations / Consultations List (Like ChatGPT / Claude) -->
-      <div class="sidebar-section sidebar-conversations-section">
-        <div class="section-title-row">
-          <span class="section-title">Previous Consultations</span>
-          <span id="session-count-pill" class="badge-pill">0</span>
-        </div>
-        <div class="conversation-locks-list" id="sidebar-sessions-list">
-          <!-- Dynamically populated conversation locks from PostgreSQL -->
-          <div class="sidebar-empty-sessions">Loading past consultations...</div>
+      <!-- Advisory Blueprints / Topic Starters -->
+      <div class="sidebar-scrollable">
+        <div class="section-label">Advisory Blueprints</div>
+        <div class="blueprint-menu">
+          <button class="blueprint-card prompt-chip" data-prompt="How should I allocate a monthly salary of ₹80,000 using the 50/30/20 budgeting rule? Calculate exact rupee values for Needs, Wants, and Investments.">
+            <div class="card-icon">📊</div>
+            <div class="card-text">
+              <strong>50/30/20 Budgeting</strong>
+              <span>Needs, wants & savings breakdown</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="What are the eligibility criteria, FOIR ratios, and estimated EMI for a ₹40,00,000 home loan at 8.5% in India?">
+            <div class="card-icon">🏠</div>
+            <div class="card-text">
+              <strong>Home Loan Eligibility</strong>
+              <span>FOIR, EMI & tax deductions</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="Compare investing ₹10,000/month via SIP in Nifty 50 Index vs picking direct equity stocks over a 15-year horizon.">
+            <div class="card-icon">📈</div>
+            <div class="card-text">
+              <strong>SIP vs Direct Stocks</strong>
+              <span>Power of compounding analysis</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="How should I structure a 6-month emergency reserve with ₹45,000 monthly living costs, and which accounts should hold it?">
+            <div class="card-icon">🛡️</div>
+            <div class="card-text">
+              <strong>Emergency Fund Plan</strong>
+              <span>Liquid funds, FDs & instant access</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="Give me a quantitative technical analysis of the Nifty 50 (^NSEI) market structure, Fair Value Gaps (FVG), and key support levels.">
+            <div class="card-icon">⚡</div>
+            <div class="card-text">
+              <strong>Nifty 50 Market Pulse</strong>
+              <span>Real-time technical analysis</span>
+            </div>
+          </button>
         </div>
       </div>
 
-      <!-- User Account Widget at Bottom of Sidebar -->
-      <div class="sidebar-user-anchor">
-        <div id="sidebar-user-card" class="sidebar-glass-card user-logged-in">
-          <div class="user-row">
-            <div class="user-avatar-circle" id="sidebar-user-avatar">R</div>
-            <div class="user-text-meta">
-              <span class="user-display-name" id="sidebar-user-name">Rohan Sharma</span>
-              <span class="user-display-email" id="sidebar-user-email">rohan.sharma@arthafin.ai</span>
+      <!-- Docked User Profile / Auth Anchor -->
+      <div class="sidebar-user-dock">
+        <!-- Logged in state -->
+        <div id="sidebar-user-card" class="user-dock-card user-logged-in" style="display: none;">
+          <div class="user-profile-row">
+            <div class="user-avatar-badge" id="sidebar-user-avatar">U</div>
+            <div class="user-info-text">
+              <span class="user-name-title" id="sidebar-user-name">User</span>
+              <span class="user-email-subtitle" id="sidebar-user-email">user@gmail.com</span>
             </div>
           </div>
-          <div class="user-actions-row">
-            <button id="sync-history-btn" class="glass-action-pill" title="Synchronize PostgreSQL chat history">
+          <div class="user-dock-actions">
+            <button id="sync-history-btn" class="dock-action-btn" title="Synchronize chat history">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                 <path d="M3 3v5h5"></path>
               </svg>
-              <span>Reload</span>
+              <span>Sync</span>
             </button>
-            <button id="clear-db-history-btn" class="glass-action-pill danger" title="Clear conversation in PostgreSQL">
+            <button id="sidebar-signout-btn" class="dock-action-btn danger" title="Sign out">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 6h18"></path>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
               </svg>
-              <span>Clear All</span>
+              <span>Logout</span>
             </button>
           </div>
+        </div>
+
+        <!-- Logged out guest state -->
+        <div id="sidebar-guest-card" class="user-dock-card user-guest">
+          <div class="guest-copy">
+            <span class="guest-heading">Save Your Financial Plans</span>
+            <p>Sign in to sync your portfolios, loans, and chats across devices.</p>
+          </div>
+          <button id="sidebar-login-trigger" class="signin-dock-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+            </svg>
+            <span>Sign In / Sign Up</span>
+          </button>
         </div>
       </div>
     </aside>
 
-    <!-- Main Workspace Viewport -->
+    <!-- Main Workspace (Gemini / Claude Centered Viewport) -->
     <main class="main-viewport">
-      <!-- Apple Glass Navigation Header -->
-      <header class="glass-nav">
-        <div class="nav-left">
-          <button id="sidebar-toggle-btn" class="glass-icon-btn" title="Toggle Sidebar">
+      <!-- Minimalist Dark Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button id="sidebar-toggle-btn" class="icon-btn" title="Toggle Sidebar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="9" y1="3" x2="9" y2="21"></line>
             </svg>
           </button>
-          <div class="nav-status-badge">
-            <div class="status-pulse-dot"></div>
-            <span class="nav-model-name" id="active-model-name">Google Gemini 3.5 Flash</span>
+          <div class="model-badge">
+            <div class="model-pulse"></div>
+            <span class="model-name">Gemini 3.5 Flash</span>
           </div>
         </div>
 
-        <!-- Center System Navigation Pills -->
-        <nav class="nav-center-tabs">
-          <button class="nav-tab-pill active" data-view="view-chat">
-            <span class="tab-icon">💬</span>
-            <span class="tab-text">1. AI Financial Chatbot</span>
-          </button>
-          <button class="nav-tab-pill" data-view="view-market">
-            <span class="tab-icon">📈</span>
-            <span class="tab-text">2. Stock Market Engine</span>
-          </button>
-          <button class="nav-tab-pill" data-view="view-finance">
-            <span class="tab-icon">💳</span>
-            <span class="tab-text">3. Personal Finance Ledger</span>
-          </button>
-        </nav>
-
-        <div class="nav-right">
-          <button id="clear-chat-btn" class="glass-icon-btn" title="Start fresh consultation">
+        <div class="header-right">
+          <button id="clear-chat-btn" class="icon-btn" title="Clear conversation view">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
             </svg>
           </button>
-          <div class="header-user-badge">
-            <div class="user-capsule-avatar" id="header-avatar">R</div>
-            <span class="user-capsule-name" id="header-name">Rohan Sharma</span>
+
+          <!-- Top header sign-in pill (shown if logged out) -->
+          <button id="header-login-btn" class="header-signin-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+            </svg>
+            <span>Sign In</span>
+          </button>
+
+          <!-- Top header user pill (shown if logged in) -->
+          <div id="header-user-capsule" class="header-user-badge" style="display: none;">
+            <div class="user-capsule-avatar" id="header-avatar">U</div>
+            <span class="user-capsule-name" id="header-name">User</span>
           </div>
         </div>
       </header>
 
-      <!-- ==================================================================== -->
-      <!-- VIEW 1: AI-Powered Financial Chatbot -->
-      <!-- ==================================================================== -->
-      <section id="view-chat" class="workspace-view active">
-        <div class="messages-flow" id="messages-container">
-          <!-- Welcome Hero & Middle Suggestions (Like ChatGPT / Claude) -->
-          <div class="welcome-hero" id="welcome-card">
-            <div class="hero-sparkle-center">
-              <div class="sparkle-halo"></div>
-              <svg width="44" height="44" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#hero-gemini-grad)"/>
-                <defs>
-                  <linearGradient id="hero-gemini-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#38bdf8"/>
-                    <stop offset="0.5" stop-color="#a78bfa"/>
-                    <stop offset="1" stop-color="#34d399"/>
-                  </linearGradient>
-                </defs>
-              </svg>
+      <!-- Centered Messages Stream (Claude & Gemini Centered Layout) -->
+      <div class="messages-flow" id="messages-container">
+        <!-- Claude & Gemini Style Welcome Hero (when no messages) -->
+        <div class="welcome-hero" id="welcome-card">
+          <div class="hero-sparkle-center">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#hero-gemini-grad)"/>
+              <defs>
+                <linearGradient id="hero-gemini-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#38bdf8"/>
+                  <stop offset="0.5" stop-color="#818cf8"/>
+                  <stop offset="1" stop-color="#34d399"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <h1 class="hero-headline">Where should we invest your focus today?</h1>
+          <p class="hero-subtext">
+            ArthaAI combines Google Gemini intelligence with high-precision integer paise computation for resilient budgeting, loan planning, and compounding wealth.
+          </p>
+
+          <!-- 4 Interactive Starter Cards -->
+          <div class="hero-starter-grid">
+            <div class="starter-card prompt-chip" data-prompt="How should I split a ₹80,000 monthly take-home income using the 50/30/20 rule? Calculate exact rupee values for Needs, Wants, and Investments.">
+              <div class="starter-card-header">
+                <span class="starter-icon">💰</span>
+                <span class="starter-arrow">↗</span>
+              </div>
+              <h3>50/30/20 Budgeting</h3>
+              <p>Allocate ₹80,000 into essential necessities, lifestyle discretionary, and automated wealth building.</p>
             </div>
 
-            <h1 class="hero-headline">How can I assist your wealth today?</h1>
-            <p class="hero-subtext">
-              Intelligent multi-turn financial advisory with persistent conversation history, live stock market structure analysis, and automated personal ledger auditing.
-            </p>
-
-            <!-- Suggestions Grid Moved to Middle of New Conversation Page -->
-            <div class="hero-starter-grid">
-              <div class="starter-card prompt-chip" data-prompt="How should I allocate a monthly salary of ₹80,000 using the 50/30/20 budgeting rule? Calculate exact rupee values for Needs, Wants, and Investments.">
-                <div class="starter-card-header">
-                  <span class="starter-icon">📊</span>
-                  <span class="starter-arrow">↗</span>
-                </div>
-                <h3>50/30/20 Budgeting Rule</h3>
-                <p>Calculate exact rupee values for Needs, Wants, and emergency wealth creation on ₹80,000 income.</p>
+            <div class="starter-card prompt-chip" data-prompt="If I invest ₹5,000/month in a Nifty 50 Index Fund at 12% expected annual return, what will my corpus grow to in 10, 15, and 20 years?">
+              <div class="starter-card-header">
+                <span class="starter-icon">📈</span>
+                <span class="starter-arrow">↗</span>
               </div>
+              <h3>SIP Compounding</h3>
+              <p>Calculate 10, 15, and 20-year corpus growth for a ₹5,000 monthly systematic investment plan.</p>
+            </div>
 
-              <div class="starter-card prompt-chip" data-prompt="What is the current Nifty 50 market trend, 20 vs 50 SMA crossover, and did we get a Break of Structure?">
-                <div class="starter-card-header">
-                  <span class="starter-icon">📈</span>
-                  <span class="starter-arrow">↗</span>
-                </div>
-                <h3>Nifty 50 Market Structure</h3>
-                <p>Quantitative breakdown: 20 vs 50 SMA crossover, Break of Structure (BoS), and Fair Value Gaps.</p>
+            <div class="starter-card prompt-chip" data-prompt="What are the essential financial safety steps before investing in equities or mutual funds?">
+              <div class="starter-card-header">
+                <span class="starter-icon">🛡️</span>
+                <span class="starter-arrow">↗</span>
               </div>
+              <h3>Financial Fortress</h3>
+              <p>Prioritize pure term life coverage, comprehensive health floater, and high-yield emergency reserves.</p>
+            </div>
 
-              <div class="starter-card prompt-chip" data-prompt="Analyze my monthly personal finance ledger. How much did I spend, what is my savings rate, and where should I cut costs?">
-                <div class="starter-card-header">
-                  <span class="starter-icon">💳</span>
-                  <span class="starter-arrow">↗</span>
-                </div>
-                <h3>Personal Spending Audit</h3>
-                <p>Scan 15+ ledger entries in PostgreSQL, identify discretionary leaks, and calculate exact savings rate.</p>
+            <div class="starter-card prompt-chip" data-prompt="Explain how prepaying a 20-year home loan by just 1 extra EMI every year impacts the total interest and loan tenure.">
+              <div class="starter-card-header">
+                <span class="starter-icon">⚡</span>
+                <span class="starter-arrow">↗</span>
               </div>
-
-              <div class="starter-card prompt-chip" data-prompt="Compare investing ₹10,000/month via SIP in Nifty 50 Index vs direct equity stocks over a 15-year horizon.">
-                <div class="starter-card-header">
-                  <span class="starter-icon">⚡</span>
-                  <span class="starter-arrow">↗</span>
-                </div>
-                <h3>SIP Compounding Calculator</h3>
-                <p>Forecast 10, 15, and 20-year corpus growth with 12% compounding returns versus active stock picks.</p>
-              </div>
-
-              <div class="starter-card prompt-chip" data-prompt="Explain how prepaying a 20-year home loan by just 1 extra EMI every year impacts the total interest and loan tenure.">
-                <div class="starter-card-header">
-                  <span class="starter-icon">🏠</span>
-                  <span class="starter-arrow">↗</span>
-                </div>
-                <h3>Home Loan Prepayment Hack</h3>
-                <p>Discover how 1 extra EMI per year shaves years off your tenure and saves lakhs in compounding interest.</p>
-              </div>
-
-              <div class="starter-card prompt-chip" data-prompt="How should I structure a 6-month emergency reserve with ₹45,000 monthly living costs, and which accounts should hold it?">
-                <div class="starter-card-header">
-                  <span class="starter-icon">🛡️</span>
-                  <span class="starter-arrow">↗</span>
-                </div>
-                <h3>Emergency Fund Blueprint</h3>
-                <p>Structure instant-access liquidity, sweep-in fixed deposits, and ultra-short duration debt funds.</p>
-              </div>
+              <h3>Loan Prepayment Hack</h3>
+              <p>Discover how 1 extra EMI per year shaves years off your tenure and saves lakhs in interest.</p>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Typing Indicator -->
-        <div class="typing-island" id="typing-indicator" style="display: none;">
-          <div class="typing-bubble">
-            <div class="typing-sparkle-icon">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#38bdf8"/>
-              </svg>
-            </div>
-            <div class="typing-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <span class="typing-status-text">ArthaAI is analyzing financial data...</span>
+      <!-- Typing Indicator -->
+      <div class="typing-container" id="typing-indicator" style="display: none;">
+        <div class="typing-indicator-pill">
+          <div class="typing-sparkle-dot">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#38bdf8"/>
+            </svg>
           </div>
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span class="typing-status-text">ArthaAI is analyzing financial data...</span>
         </div>
+      </div>
 
-        <!-- Floating Prompt Island -->
-        <footer class="prompt-island-container">
-          <div class="glass-prompt-island">
-            <form id="chat-form" class="prompt-input-form">
-              <textarea
-                id="message-input"
-                rows="1"
-                placeholder="Ask about budgeting, Nifty 50 market trends, or review your monthly spending ledger..."
-                required
-              ></textarea>
+      <!-- Grounded Floating Prompt Box (Claude & Gemini Style) -->
+      <footer class="prompt-box-wrapper">
+        <div class="prompt-box-container">
+          <form id="chat-form" class="prompt-form">
+            <textarea
+              id="message-input"
+              rows="1"
+              placeholder="Ask ArthaAI about budgeting, SIPs, loans, emergency funds, or stock trends..."
+              required
+            ></textarea>
 
-              <div class="prompt-action-bar">
-                <div class="prompt-tag">
-                  <span class="tag-symbol">₹</span>
-                  <span>PostgreSQL • Integer Paise Precision</span>
-                </div>
-                <button type="submit" id="send-btn" class="glass-send-btn" aria-label="Send query">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="19" x2="12" y2="5"></line>
-                    <polyline points="5 12 12 5 19 12"></polyline>
-                  </svg>
-                </button>
+            <div class="prompt-bottom-bar">
+              <div class="prompt-badge-tag">
+                <span class="tag-symbol">₹</span>
+                <span>INR • Integer-Paise Precision</span>
               </div>
-            </form>
-            <div class="prompt-disclaimer">
-              <span>Conversations are persisted in PostgreSQL. Click any conversation in the left sidebar to resume.</span>
-            </div>
-          </div>
-        </footer>
-      </section>
-
-      <!-- ==================================================================== -->
-      <!-- VIEW 2: AI-Based Stock Market Analysis and Prediction System -->
-      <!-- ==================================================================== -->
-      <section id="view-market" class="workspace-view" style="display: none;">
-        <div class="market-dashboard-container">
-          <!-- Market Controls Header -->
-          <div class="dashboard-header-bar">
-            <div class="dashboard-title-group">
-              <h2>Stock Market Quantitative Engine</h2>
-              <span id="market-as-of-badge" class="badge-pill">Syncing...</span>
-            </div>
-
-            <div class="dashboard-actions-group">
-              <!-- Asset Switcher -->
-              <div class="segmented-control">
-                <button class="seg-btn active" data-ticker="^NSEI">Nifty 50 (^NSEI)</button>
-                <button class="seg-btn" data-ticker="^GSPC">S&P 500 (^GSPC)</button>
-              </div>
-
-              <button id="refresh-market-btn" class="glass-primary-action-btn">
-                <span>🔄 Sync Market Data</span>
-              </button>
-
-              <button id="ask-market-ai-btn" class="glass-accent-btn">
-                <span>💬 Ask Market AI</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Market Metric Hero Grid -->
-          <div class="metric-cards-grid">
-            <!-- 1. Trend & SMA Crossover -->
-            <div class="glass-metric-card" id="card-trend">
-              <div class="metric-card-header">
-                <span class="metric-title">20 vs 50 SMA Crossover</span>
-                <span id="trend-crossover-badge" class="status-chip neutral">Loading...</span>
-              </div>
-              <div class="metric-main-value" id="trend-close-price">₹0.00</div>
-              <div class="metric-subtext" id="trend-sma-details">20 SMA: ₹0.00 | 50 SMA: ₹0.00</div>
-              <p class="metric-explanation" id="trend-summary-text">Evaluating moving average crossover...</p>
-            </div>
-
-            <!-- 2. Market Structure (Break of Structure) -->
-            <div class="glass-metric-card" id="card-bos">
-              <div class="metric-card-header">
-                <span class="metric-title">Market Structure (BoS)</span>
-                <span id="bos-status-badge" class="status-chip neutral">Scanning...</span>
-              </div>
-              <div class="metric-main-value" id="bos-level-price">₹0.00</div>
-              <div class="metric-subtext" id="bos-swings-text">Recent Swing High / Low</div>
-              <p class="metric-explanation" id="bos-description-text">Scanning for swing breaks...</p>
-            </div>
-
-            <!-- 3. Fair Value Gaps (FVG) -->
-            <div class="glass-metric-card" id="card-fvg">
-              <div class="metric-card-header">
-                <span class="metric-title">Fair Value Gaps (FVG)</span>
-                <span id="fvg-count-badge" class="status-chip neutral">0 Active</span>
-              </div>
-              <div class="metric-main-value" id="fvg-latest-range">None</div>
-              <div class="metric-subtext" id="fvg-formation-date">3-Candle Imbalance Scan</div>
-              <p class="metric-explanation" id="fvg-description-text">Scanning price voids...</p>
-            </div>
-
-            <!-- 4. Key Liquidity & Point of Control (PoC) -->
-            <div class="glass-metric-card" id="card-liquidity">
-              <div class="metric-card-header">
-                <span class="metric-title">Point of Control (PoC)</span>
-                <span class="status-chip active">Volume Profile</span>
-              </div>
-              <div class="metric-main-value" id="poc-price-level">₹0.00</div>
-              <div class="metric-subtext" id="poc-weight-text">High-Volume Node Density</div>
-              <p class="metric-explanation" id="poc-description-text">Identifying institutional liquidity levels...</p>
-            </div>
-          </div>
-
-          <!-- AI Market Prediction & Commentary Card -->
-          <div class="glass-full-card ai-insight-card">
-            <div class="card-title-row">
-              <div class="ai-sparkle-pill">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#38bdf8">
-                  <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>
+              <button type="submit" id="send-btn" class="send-action-btn" aria-label="Send query">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
                 </svg>
-                <span>AI Quantitative Prediction & Outlook</span>
-              </div>
-              <span class="badge-pill">Powered by Google Gemini 3.5</span>
-            </div>
-            <div id="market-ai-prediction-body" class="ai-commentary-text">
-              Loading real-time quantitative interpretation for current market structure...
-            </div>
-          </div>
-
-          <!-- Candlestick Time-Series Table -->
-          <div class="glass-full-card">
-            <div class="card-title-row">
-              <h3>Daily Candlestick History (Integer Paise Decoded)</h3>
-              <span id="candles-count-badge" class="badge-pill">60+ Sessions</span>
-            </div>
-            <div class="table-scroll-wrapper">
-              <table class="glass-data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Open</th>
-                    <th>High</th>
-                    <th>Low</th>
-                    <th>Close</th>
-                    <th>Volume</th>
-                  </tr>
-                </thead>
-                <tbody id="market-candles-tbody">
-                  <tr>
-                    <td colspan="6" class="table-loading">Loading candlestick records...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================================================================== -->
-      <!-- VIEW 3: AI-Powered Personal Finance Management System -->
-      <!-- ==================================================================== -->
-      <section id="view-finance" class="workspace-view" style="display: none;">
-        <div class="finance-dashboard-container">
-          <!-- Finance Controls Header -->
-          <div class="dashboard-header-bar">
-            <div class="dashboard-title-group">
-              <h2>Personal Finance & Wealth Manager</h2>
-              <span id="finance-period-badge" class="badge-pill">Monthly Ledger</span>
-            </div>
-
-            <div class="dashboard-actions-group">
-              <button id="open-add-tx-modal-btn" class="glass-primary-action-btn">
-                <span>➕ Add Transaction</span>
-              </button>
-              <button id="ask-finance-ai-btn" class="glass-accent-btn">
-                <span>💬 Consult Wealth AI</span>
               </button>
             </div>
-          </div>
-
-          <!-- Top Ledger Summary Grid -->
-          <div class="metric-cards-grid">
-            <div class="glass-metric-card">
-              <div class="metric-card-header">
-                <span class="metric-title">Monthly Income</span>
-                <span class="status-chip success">Inflows</span>
-              </div>
-              <div class="metric-main-value text-emerald" id="fin-income-total">₹0.00</div>
-              <p class="metric-explanation">Verified salary and consultancy deposits</p>
-            </div>
-
-            <div class="glass-metric-card">
-              <div class="metric-card-header">
-                <span class="metric-title">Total Outflows</span>
-                <span class="status-chip danger">Expenses</span>
-              </div>
-              <div class="metric-main-value text-rose" id="fin-expense-total">₹0.00</div>
-              <p class="metric-explanation">Fixed necessities and discretionary outflows</p>
-            </div>
-
-            <div class="glass-metric-card">
-              <div class="metric-card-header">
-                <span class="metric-title">Net Savings</span>
-                <span id="fin-savings-badge" class="status-chip neutral">Surplus</span>
-              </div>
-              <div class="metric-main-value" id="fin-savings-total">₹0.00</div>
-              <p class="metric-explanation">Cash available for systematic investing (SIPs)</p>
-            </div>
-
-            <div class="glass-metric-card">
-              <div class="metric-card-header">
-                <span class="metric-title">Savings Rate</span>
-                <span id="fin-rate-status" class="status-chip warning">Target: 20-30%</span>
-              </div>
-              <div class="metric-main-value" id="fin-savings-rate">0.0%</div>
-              <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="fin-savings-bar" style="width: 0%;"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Graphical Representation: Interactive Donut / Pie Chart & Breakdown -->
-          <div class="glass-full-card" id="finance-chart-card">
-            <div class="card-title-row">
-              <h3>Expense Distribution Analysis</h3>
-              <span class="badge-pill">Interactive Category Pie Chart</span>
-            </div>
-            <div class="chart-layout-grid">
-              <div class="pie-chart-wrapper" id="finance-pie-chart-container">
-                <!-- Responsive SVG Donut Chart with center value -->
-              </div>
-              <div class="pie-chart-legend" id="finance-pie-legend">
-                <!-- Legend list with color dots, amounts & percentages -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Discretionary Spending Alert Card -->
-          <div class="glass-full-card alert-card" id="discretionary-alerts-container">
-            <div class="card-title-row">
-              <div class="alert-header-title">
-                <span class="alert-icon">⚠️</span>
-                <h3>Discretionary Spending Leaks Identified</h3>
-              </div>
-              <span class="badge-pill danger">AI Spending Alert</span>
-            </div>
-            <div class="alerts-grid" id="discretionary-alerts-list">
-              <!-- Injected by JavaScript -->
-            </div>
-          </div>
-
-          <!-- Category Breakdown & Visual Progress Bars -->
-          <div class="glass-full-card">
-            <div class="card-title-row">
-              <h3>Monthly Expense Breakdown by Category</h3>
-              <span class="badge-pill">Categorized Outflows</span>
-            </div>
-            <div class="category-bars-container" id="category-bars-list">
-              <!-- Injected by JavaScript -->
-            </div>
-          </div>
-
-          <!-- Transactions Ledger Table -->
-          <div class="glass-full-card">
-            <div class="card-title-row">
-              <!-- Updated title without the paise suffix -->
-              <h3>Personal Ledger Transactions</h3>
-              <span id="tx-count-badge" class="badge-pill">0 Entries</span>
-            </div>
-            <div class="table-scroll-wrapper">
-              <table class="glass-data-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Category</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="finance-transactions-tbody">
-                  <tr>
-                    <td colspan="6" class="table-loading">Loading transaction records...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          </form>
+          <div class="prompt-legal-footer">
+            <span>ArthaAI provides educational personal finance analysis. Verify major loan and tax decisions with a certified advisor.</span>
           </div>
         </div>
-      </section>
+      </footer>
     </main>
   </div>
 
-  <!-- Add / Edit Transaction Modal -->
-  <div id="tx-modal" class="auth-modal-backdrop" style="display: none;">
-    <div class="auth-glass-card">
-      <button id="tx-modal-close" class="modal-close-icon" title="Close">✕</button>
-      <div class="auth-card-brand">
-        <h2 id="tx-modal-heading">Add Personal Transaction</h2>
-        <p id="tx-modal-subheading">Recorded into PostgreSQL with integer paise precision</p>
+  <!-- Pinterest-Style Authentication Modal -->
+  <div id="auth-modal" class="auth-modal-backdrop" style="display: none;">
+    <div class="auth-modal-card">
+      <button id="auth-modal-close" class="modal-close-btn" title="Close">✕</button>
+
+      <div class="auth-card-top">
+        <div class="auth-sparkle-badge">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#auth-sparkle-grad)"/>
+            <defs>
+              <linearGradient id="auth-sparkle-grad" x1="2" y1="2" x2="22" y2="22">
+                <stop stop-color="#38bdf8"/>
+                <stop offset="0.5" stop-color="#818cf8"/>
+                <stop offset="1" stop-color="#34d399"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h2 id="auth-heading">Welcome to ArthaAI</h2>
+        <p id="auth-subheading">Intelligent financial planning & wealth intelligence</p>
       </div>
 
-      <form id="add-transaction-form" class="auth-form-step">
-        <input type="hidden" id="tx-edit-id" value="">
+      <!-- Error Banner -->
+      <div id="auth-error-banner" class="auth-error-banner" style="display: none;"></div>
 
-        <div class="input-group">
-          <label for="tx-amount">Amount (in ₹ Rupees)</label>
-          <input type="number" id="tx-amount" step="0.01" min="0.01" placeholder="e.g. 2500.00" required>
+      <!-- 1. Pinterest Style: Continue with Google Button -->
+      <button id="google-auth-btn" class="pinterest-google-btn" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Pinterest Style Step 1: Email Input Form -->
+      <form id="auth-step-email" class="auth-form-step">
+        <div class="form-group">
+          <label for="auth-email-input">Email address</label>
+          <input
+            type="email"
+            id="auth-email-input"
+            placeholder="name@example.com"
+            autocomplete="email"
+            required
+          />
         </div>
-
-        <div class="input-group">
-          <label for="tx-category">Category</label>
-          <select id="tx-category" required class="glass-select">
-            <option value="">Select a Category...</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label for="tx-description">Description</label>
-          <input type="text" id="tx-description" placeholder="e.g. Swiggy Lunch Delivery" required>
-        </div>
-
-        <div class="input-group">
-          <label for="tx-date">Date</label>
-          <input type="date" id="tx-date" required>
-        </div>
-
-        <button type="submit" id="save-tx-btn" class="pinterest-primary-btn">
-          <span>Save Transaction</span>
+        <button type="submit" id="email-continue-btn" class="pinterest-submit-btn">
+          <span>Continue</span>
         </button>
       </form>
+
+      <!-- Pinterest Style Step 2A: Login with Password (Existing User) -->
+      <form id="auth-step-login" class="auth-form-step" style="display: none;">
+        <div class="email-badge-row">
+          <span id="login-email-display">user@gmail.com</span>
+          <button type="button" id="edit-email-btn" class="edit-email-link">Edit</button>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-login-password">Password</label>
+          <div class="password-field-container">
+            <input
+              type="password"
+              id="auth-login-password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-login-password">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="pinterest-submit-btn">
+          <span>Log In</span>
+        </button>
+
+        <button type="button" class="back-link" onclick="goToStep('email')">
+          ← Back to email
+        </button>
+      </form>
+
+      <!-- Pinterest Style Step 2B: Register (New User) -->
+      <form id="auth-step-register" class="auth-form-step" style="display: none;">
+        <div class="register-note-box">
+          <p>Looks like you don't have an account yet. Create a password to sign up with <strong id="register-email-display">user@gmail.com</strong></p>
+          <button type="button" id="edit-register-email-btn" class="edit-email-link">Change email</button>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-register-name">Full name (optional)</label>
+          <input
+            type="text"
+            id="auth-register-name"
+            placeholder="e.g. Aarav Sharma"
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="auth-register-password">Create password</label>
+          <div class="password-field-container">
+            <input
+              type="password"
+              id="auth-register-password"
+              placeholder="At least 8 characters"
+              autocomplete="new-password"
+              required
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-register-password">
+              👁️
+            </button>
+          </div>
+          <div class="strength-track">
+            <div id="password-strength-bar" class="strength-meter"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-register-confirm">Confirm password</label>
+          <div class="password-field-container">
+            <input
+              type="password"
+              id="auth-register-confirm"
+              placeholder="Repeat your password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" id="register-submit-btn" class="pinterest-submit-btn">
+          <span>Create Account</span>
+        </button>
+
+        <button type="button" class="back-link" onclick="goToStep('email')">
+          ← Back to email
+        </button>
+      </form>
+
+      <div class="auth-terms-footer">
+        By continuing, you agree to ArthaAI's <span>Terms of Service</span> and <span>Privacy Policy</span>. Protected by 256-bit encryption.
+      </div>
     </div>
   </div>
 
