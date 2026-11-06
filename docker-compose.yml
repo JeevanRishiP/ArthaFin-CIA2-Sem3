@@ -1,0 +1,26 @@
+name: arthafin
+
+services:
+  arthafin_postgres:
+    image: postgres:16-alpine
+    container_name: arthafin_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: arthafin_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5435:5432"
+    volumes:
+      - arthafin_postgres_data:/var/lib/postgresql/data
+      - ./src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./src/db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    networks:
+      - arthafin_network
+
+volumes:
+  arthafin_postgres_data:
+
+networks:
+  arthafin_network:
+    driver: bridge
