@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArthaAI • Intelligent Financial Advisor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="claude-dark-theme">
+  <div class="app-shell">
+    <!-- Left Sidebar (Claude / Gemini Style) -->
+    <aside class="app-sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="brand">
+          <div class="brand-sparkle-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#brand-gemini-grad)"/>
+              <defs>
+                <linearGradient id="brand-gemini-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#38bdf8"/>
+                  <stop offset="0.5" stop-color="#818cf8"/>
+                  <stop offset="1" stop-color="#34d399"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="brand-meta">
+            <h2>ArthaAI</h2>
+            <span>Financial Intelligence</span>
+          </div>
+        </div>
+
+        <button id="sidebar-close-btn" class="icon-btn mobile-only" title="Close Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- New Consultation Button -->
+      <button id="new-chat-btn" class="new-chat-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>New Consultation</span>
+      </button>
+
+      <!-- Advisory Blueprints / Topic Starters -->
+      <div class="sidebar-scrollable">
+        <div class="section-label">Advisory Blueprints</div>
+        <div class="blueprint-menu">
+          <button class="blueprint-card prompt-chip" data-prompt="How should I allocate a monthly salary of ₹80,000 using the 50/30/20 budgeting rule? Calculate exact rupee values for Needs, Wants, and Investments.">
+            <div class="card-icon">📊</div>
+            <div class="card-text">
+              <strong>50/30/20 Budgeting</strong>
+              <span>Needs, wants & savings breakdown</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="What are the eligibility criteria, FOIR ratios, and estimated EMI for a ₹40,00,000 home loan at 8.5% in India?">
+            <div class="card-icon">🏠</div>
+            <div class="card-text">
+              <strong>Home Loan Eligibility</strong>
+              <span>FOIR, EMI & tax deductions</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="Compare investing ₹10,000/month via SIP in Nifty 50 Index vs picking direct equity stocks over a 15-year horizon.">
+            <div class="card-icon">📈</div>
+            <div class="card-text">
+              <strong>SIP vs Direct Stocks</strong>
+              <span>Power of compounding analysis</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="How should I structure a 6-month emergency reserve with ₹45,000 monthly living costs, and which accounts should hold it?">
+            <div class="card-icon">🛡️</div>
+            <div class="card-text">
+              <strong>Emergency Fund Plan</strong>
+              <span>Liquid funds, FDs & instant access</span>
+            </div>
+          </button>
+
+          <button class="blueprint-card prompt-chip" data-prompt="Give me a quantitative technical analysis of the Nifty 50 (^NSEI) market structure, Fair Value Gaps (FVG), and key support levels.">
+            <div class="card-icon">⚡</div>
+            <div class="card-text">
+              <strong>Nifty 50 Market Pulse</strong>
+              <span>Real-time technical analysis</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Docked User Profile / Auth Anchor -->
+      <div class="sidebar-user-dock">
+        <!-- Logged in state -->
+        <div id="sidebar-user-card" class="user-dock-card user-logged-in" style="display: none;">
+          <div class="user-profile-row">
+            <div class="user-avatar-badge" id="sidebar-user-avatar">U</div>
+            <div class="user-info-text">
+              <span class="user-name-title" id="sidebar-user-name">User</span>
+              <span class="user-email-subtitle" id="sidebar-user-email">user@gmail.com</span>
+            </div>
+          </div>
+          <div class="user-dock-actions">
+            <button id="sync-history-btn" class="dock-action-btn" title="Synchronize chat history">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              <span>Sync</span>
+            </button>
+            <button id="sidebar-signout-btn" class="dock-action-btn danger" title="Sign out">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Logged out guest state -->
+        <div id="sidebar-guest-card" class="user-dock-card user-guest">
+          <div class="guest-copy">
+            <span class="guest-heading">Save Your Financial Plans</span>
+            <p>Sign in to sync your portfolios, loans, and chats across devices.</p>
+          </div>
+          <button id="sidebar-login-trigger" class="signin-dock-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+            </svg>
+            <span>Sign In / Sign Up</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace (Gemini / Claude Centered Viewport) -->
+    <main class="main-viewport">
+      <!-- Minimalist Dark Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button id="sidebar-toggle-btn" class="icon-btn" title="Toggle Sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </button>
+          <div class="model-badge">
+            <div class="model-pulse"></div>
+            <span class="model-name">Gemini 3.5 Flash</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button id="calc-toggle-btn" class="icon-btn" title="Financial Quick Calculators (SIP, EMI, Budget)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+              <line x1="8" y1="6" x2="16" y2="6"></line>
+              <line x1="16" y1="14" x2="16" y2="18"></line>
+              <path d="M16 10h.01"></path>
+              <path d="M12 10h.01"></path>
+              <path d="M8 10h.01"></path>
+              <path d="M12 14h.01"></path>
+              <path d="M8 14h.01"></path>
+              <path d="M12 18h.01"></path>
+              <path d="M8 18h.01"></path>
+            </svg>
+          </button>
+
+          <button id="export-chat-btn" class="icon-btn" title="Export conversation as Markdown">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+
+          <button id="clear-chat-btn" class="icon-btn" title="Clear conversation view">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18"></path>
+              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+            </svg>
+          </button>
+
+          <!-- Top header sign-in pill (shown if logged out) -->
+          <button id="header-login-btn" class="header-signin-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+            </svg>
+            <span>Sign In</span>
+          </button>
+
+          <!-- Top header user pill (shown if logged in) -->
+          <div id="header-user-capsule" class="header-user-badge" style="display: none;">
+            <div class="user-capsule-avatar" id="header-avatar">U</div>
+            <span class="user-capsule-name" id="header-name">User</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Centered Messages Stream (Claude & Gemini Centered Layout) -->
+      <div class="messages-flow" id="messages-container">
+        <!-- Claude & Gemini Style Welcome Hero (when no messages) -->
+        <div class="welcome-hero" id="welcome-card">
+          <div class="hero-sparkle-center">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#hero-gemini-grad)"/>
+              <defs>
+                <linearGradient id="hero-gemini-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#38bdf8"/>
+                  <stop offset="0.5" stop-color="#818cf8"/>
+                  <stop offset="1" stop-color="#34d399"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <h1 class="hero-headline">Where should we invest your focus today?</h1>
+          <p class="hero-subtext">
+            ArthaAI combines Google Gemini intelligence with high-precision integer paise computation for resilient budgeting, loan planning, and compounding wealth.
+          </p>
+
+          <!-- 4 Interactive Starter Cards -->
+          <div class="hero-starter-grid">
+            <div class="starter-card prompt-chip" data-prompt="How should I split a ₹80,000 monthly take-home income using the 50/30/20 rule? Calculate exact rupee values for Needs, Wants, and Investments.">
+              <div class="starter-card-header">
+                <span class="starter-icon">💰</span>
+                <span class="starter-arrow">↗</span>
+              </div>
+              <h3>50/30/20 Budgeting</h3>
+              <p>Allocate ₹80,000 into essential necessities, lifestyle discretionary, and automated wealth building.</p>
+            </div>
+
+            <div class="starter-card prompt-chip" data-prompt="If I invest ₹5,000/month in a Nifty 50 Index Fund at 12% expected annual return, what will my corpus grow to in 10, 15, and 20 years?">
+              <div class="starter-card-header">
+                <span class="starter-icon">📈</span>
+                <span class="starter-arrow">↗</span>
+              </div>
+              <h3>SIP Compounding</h3>
+              <p>Calculate 10, 15, and 20-year corpus growth for a ₹5,000 monthly systematic investment plan.</p>
+            </div>
+
+            <div class="starter-card prompt-chip" data-prompt="What are the essential financial safety steps before investing in equities or mutual funds?">
+              <div class="starter-card-header">
+                <span class="starter-icon">🛡️</span>
+                <span class="starter-arrow">↗</span>
+              </div>
+              <h3>Financial Fortress</h3>
+              <p>Prioritize pure term life coverage, comprehensive health floater, and high-yield emergency reserves.</p>
+            </div>
+
+            <div class="starter-card prompt-chip" data-prompt="Explain how prepaying a 20-year home loan by just 1 extra EMI every year impacts the total interest and loan tenure.">
+              <div class="starter-card-header">
+                <span class="starter-icon">⚡</span>
+                <span class="starter-arrow">↗</span>
+              </div>
+              <h3>Loan Prepayment Hack</h3>
+              <p>Discover how 1 extra EMI per year shaves years off your tenure and saves lakhs in interest.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="typing-container" id="typing-indicator" style="display: none;">
+        <div class="typing-indicator-pill">
+          <div class="typing-sparkle-dot">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#38bdf8"/>
+            </svg>
+          </div>
+          <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span class="typing-status-text">ArthaAI is analyzing financial data...</span>
+        </div>
+      </div>
+
+      <!-- Grounded Floating Prompt Box (Claude & Gemini Style) -->
+      <footer class="prompt-box-wrapper">
+        <div class="prompt-box-container">
+          <form id="chat-form" class="prompt-form">
+            <textarea
+              id="message-input"
+              rows="1"
+              placeholder="Ask ArthaAI about budgeting, SIPs, loans, emergency funds, or stock trends..."
+              required
+            ></textarea>
+
+            <div class="prompt-bottom-bar">
+              <div class="prompt-badge-tag">
+                <span class="tag-symbol">₹</span>
+                <span>INR • Integer-Paise Precision</span>
+              </div>
+              <button type="submit" id="send-btn" class="send-action-btn" aria-label="Send query">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </form>
+          <div class="prompt-legal-footer">
+            <span>ArthaAI provides educational personal finance analysis. Verify major loan and tax decisions with a certified advisor.</span>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Interactive Financial Calculators Modal -->
+  <div id="calc-modal" class="auth-modal-backdrop" style="display: none;">
+    <div class="calc-modal-card">
+      <div class="calc-modal-header">
+        <div class="calc-header-title">
+          <span class="calc-icon">🧮</span>
+          <h3>Financial Quick Calculators</h3>
+        </div>
+        <button id="calc-modal-close" class="modal-close-btn" title="Close">✕</button>
+      </div>
+
+      <!-- Calculator Tabs -->
+      <div class="calc-tabs">
+        <button class="calc-tab-btn active" data-tab="sip">SIP Compounding</button>
+        <button class="calc-tab-btn" data-tab="emi">Loan EMI</button>
+        <button class="calc-tab-btn" data-tab="budget">50/30/20 Budget</button>
+      </div>
+
+      <!-- Tab 1: SIP Calculator -->
+      <div id="tab-sip" class="calc-tab-panel active">
+        <div class="calc-input-group">
+          <label>Monthly Investment: <strong id="sip-amount-display">₹10,000</strong></label>
+          <input type="range" id="sip-amount-slider" min="1000" max="100000" step="1000" value="10000" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Expected Annual Return (CAGR): <strong id="sip-rate-display">12%</strong></label>
+          <input type="range" id="sip-rate-slider" min="6" max="24" step="0.5" value="12" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Time Horizon: <strong id="sip-years-display">15 Years</strong></label>
+          <input type="range" id="sip-years-slider" min="1" max="30" step="1" value="15" class="calc-slider" />
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-stat">
+            <span>Invested Capital</span>
+            <strong id="sip-invested-res">₹18,00,000</strong>
+          </div>
+          <div class="calc-result-stat">
+            <span>Est. Returns</span>
+            <strong id="sip-returns-res" class="text-emerald">₹32,45,760</strong>
+          </div>
+          <div class="calc-result-stat total">
+            <span>Total Corpus</span>
+            <strong id="sip-total-res" class="text-cyan">₹50,45,760</strong>
+          </div>
+        </div>
+
+        <button id="sip-ask-ai-btn" class="pinterest-submit-btn" style="margin-top: 14px;">
+          <span>Ask ArthaAI to Analyze This SIP</span>
+        </button>
+      </div>
+
+      <!-- Tab 2: Loan EMI Calculator -->
+      <div id="tab-emi" class="calc-tab-panel" style="display: none;">
+        <div class="calc-input-group">
+          <label>Loan Principal: <strong id="emi-amount-display">₹40,00,000</strong></label>
+          <input type="range" id="emi-amount-slider" min="100000" max="20000000" step="100000" value="4000000" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Interest Rate (% p.a.): <strong id="emi-rate-display">8.5%</strong></label>
+          <input type="range" id="emi-rate-slider" min="6.5" max="18" step="0.1" value="8.5" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Tenure: <strong id="emi-years-display">20 Years</strong></label>
+          <input type="range" id="emi-years-slider" min="1" max="30" step="1" value="20" class="calc-slider" />
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-stat">
+            <span>Monthly EMI</span>
+            <strong id="emi-monthly-res" class="text-cyan">₹34,713</strong>
+          </div>
+          <div class="calc-result-stat">
+            <span>Total Interest</span>
+            <strong id="emi-interest-res">₹43,31,101</strong>
+          </div>
+          <div class="calc-result-stat total">
+            <span>Total Payment</span>
+            <strong id="emi-total-res">₹83,31,101</strong>
+          </div>
+        </div>
+
+        <button id="emi-ask-ai-btn" class="pinterest-submit-btn" style="margin-top: 14px;">
+          <span>Analyze Loan Prepayment Hacks with AI</span>
+        </button>
+      </div>
+
+      <!-- Tab 3: 50/30/20 Budget Allocator -->
+      <div id="tab-budget" class="calc-tab-panel" style="display: none;">
+        <div class="calc-input-group">
+          <label>Monthly Take-Home Salary: <strong id="budget-income-display">₹75,000</strong></label>
+          <input type="range" id="budget-income-slider" min="15000" max="500000" step="5000" value="75000" class="calc-slider" />
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-stat">
+            <span>Needs (50%)</span>
+            <strong id="budget-needs-res">₹37,500</strong>
+          </div>
+          <div class="calc-result-stat">
+            <span>Wants (30%)</span>
+            <strong id="budget-wants-res">₹22,500</strong>
+          </div>
+          <div class="calc-result-stat total">
+            <span>Savings & Investments (20%)</span>
+            <strong id="budget-savings-res" class="text-emerald">₹15,000</strong>
+          </div>
+        </div>
+
+        <button id="budget-ask-ai-btn" class="pinterest-submit-btn" style="margin-top: 14px;">
+          <span>Ask ArthaAI to Create a Detailed Budget</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pinterest-Style Authentication Modal -->
+  <div id="auth-modal" class="auth-modal-backdrop" style="display: none;">
+    <div class="auth-modal-card">
+      <button id="auth-modal-close" class="modal-close-btn" title="Close">✕</button>
+
+      <div class="auth-card-top">
+        <div class="auth-sparkle-badge">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#auth-sparkle-grad)"/>
+            <defs>
+              <linearGradient id="auth-sparkle-grad" x1="2" y1="2" x2="22" y2="22">
+                <stop stop-color="#38bdf8"/>
+                <stop offset="0.5" stop-color="#818cf8"/>
+                <stop offset="1" stop-color="#34d399"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h2 id="auth-heading">Welcome to ArthaAI</h2>
+        <p id="auth-subheading">Intelligent financial planning & wealth intelligence</p>
+      </div>
+
+      <!-- Error Banner -->
+      <div id="auth-error-banner" class="auth-error-banner" style="display: none;"></div>
+
+      <!-- 1. Pinterest Style: Continue with Google Button -->
+      <button id="google-auth-btn" class="pinterest-google-btn" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Pinterest Style Step 1: Email Input Form -->
+      <form id="auth-step-email" class="auth-form-step">
+        <div class="form-group">
+          <label for="auth-email-input">Email address</label>
+          <input
+            type="email"
+            id="auth-email-input"
+            placeholder="name@example.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+        <button type="submit" id="email-continue-btn" class="pinterest-submit-btn">
+          <span>Continue</span>
+        </button>
+      </form>
+
+      <!-- Pinterest Style Step 2A: Login with Password (Existing User) -->
+      <form id="auth-step-login" class="auth-form-step" style="display: none;">
+        <div class="email-badge-row">
+          <span id="login-email-display">user@gmail.com</span>
+          <button type="button" id="edit-email-btn" class="edit-email-link">Edit</button>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-login-password">Password</label>
+          <div class="password-field-container">
+            <input
+              type="password"
+              id="auth-login-password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-login-password">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="pinterest-submit-btn">
+          <span>Log In</span>
+        </button>
+
+        <button type="button" class="back-link" onclick="goToStep('email')">
+          ← Back to email
+        </button>
+      </form>
+
+      <!-- Pinterest Style Step 2B: Register (New User) -->
+      <form id="auth-step-register" class="auth-form-step" style="display: none;">
+        <div class="register-note-box">
+          <p>Looks like you don't have an account yet. Create a password to sign up with <strong id="register-email-display">user@gmail.com</strong></p>
+          <button type="button" id="edit-register-email-btn" class="edit-email-link">Change email</button>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-register-name">Full name (optional)</label>
+          <input
+            type="text"
+            id="auth-register-name"
+            placeholder="e.g. Aarav Sharma"
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="auth-register-password">Create password</label>
+          <div class="password-field-container">
+            <input
+              type="password"
+              id="auth-register-password"
+              placeholder="At least 8 characters"
+              autocomplete="new-password"
+              required
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-register-password">
+              👁️
+            </button>
+          </div>
+          <div class="strength-track">
+            <div id="password-strength-bar" class="strength-meter"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="auth-register-confirm">Confirm password</label>
+          <div class="password-field-container">
+            <input
+              type="password"
+              id="auth-register-confirm"
+              placeholder="Repeat your password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" id="register-submit-btn" class="pinterest-submit-btn">
+          <span>Create Account</span>
+        </button>
+
+        <button type="button" class="back-link" onclick="goToStep('email')">
+          ← Back to email
+        </button>
+      </form>
+
+      <div class="auth-terms-footer">
+        By continuing, you agree to ArthaAI's <span>Terms of Service</span> and <span>Privacy Policy</span>. Protected by 256-bit encryption.
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

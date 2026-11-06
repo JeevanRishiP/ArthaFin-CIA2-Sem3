@@ -163,6 +163,29 @@
         </div>
 
         <div class="header-right">
+          <button id="calc-toggle-btn" class="icon-btn" title="Financial Quick Calculators (SIP, EMI, Budget)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+              <line x1="8" y1="6" x2="16" y2="6"></line>
+              <line x1="16" y1="14" x2="16" y2="18"></line>
+              <path d="M16 10h.01"></path>
+              <path d="M12 10h.01"></path>
+              <path d="M8 10h.01"></path>
+              <path d="M12 14h.01"></path>
+              <path d="M8 14h.01"></path>
+              <path d="M12 18h.01"></path>
+              <path d="M8 18h.01"></path>
+            </svg>
+          </button>
+
+          <button id="export-chat-btn" class="icon-btn" title="Export conversation as Markdown">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+
           <button id="clear-chat-btn" class="icon-btn" title="Clear conversation view">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 6h18"></path>
@@ -300,6 +323,123 @@
         </div>
       </footer>
     </main>
+  </div>
+
+  <!-- Interactive Financial Calculators Modal -->
+  <div id="calc-modal" class="auth-modal-backdrop" style="display: none;">
+    <div class="calc-modal-card">
+      <div class="calc-modal-header">
+        <div class="calc-header-title">
+          <span class="calc-icon">🧮</span>
+          <h3>Financial Quick Calculators</h3>
+        </div>
+        <button id="calc-modal-close" class="modal-close-btn" title="Close">✕</button>
+      </div>
+
+      <!-- Calculator Tabs -->
+      <div class="calc-tabs">
+        <button class="calc-tab-btn active" data-tab="sip">SIP Compounding</button>
+        <button class="calc-tab-btn" data-tab="emi">Loan EMI</button>
+        <button class="calc-tab-btn" data-tab="budget">50/30/20 Budget</button>
+      </div>
+
+      <!-- Tab 1: SIP Calculator -->
+      <div id="tab-sip" class="calc-tab-panel active">
+        <div class="calc-input-group">
+          <label>Monthly Investment: <strong id="sip-amount-display">₹10,000</strong></label>
+          <input type="range" id="sip-amount-slider" min="1000" max="100000" step="1000" value="10000" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Expected Annual Return (CAGR): <strong id="sip-rate-display">12%</strong></label>
+          <input type="range" id="sip-rate-slider" min="6" max="24" step="0.5" value="12" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Time Horizon: <strong id="sip-years-display">15 Years</strong></label>
+          <input type="range" id="sip-years-slider" min="1" max="30" step="1" value="15" class="calc-slider" />
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-stat">
+            <span>Invested Capital</span>
+            <strong id="sip-invested-res">₹18,00,000</strong>
+          </div>
+          <div class="calc-result-stat">
+            <span>Est. Returns</span>
+            <strong id="sip-returns-res" class="text-emerald">₹32,45,760</strong>
+          </div>
+          <div class="calc-result-stat total">
+            <span>Total Corpus</span>
+            <strong id="sip-total-res" class="text-cyan">₹50,45,760</strong>
+          </div>
+        </div>
+
+        <button id="sip-ask-ai-btn" class="pinterest-submit-btn" style="margin-top: 14px;">
+          <span>Ask ArthaAI to Analyze This SIP</span>
+        </button>
+      </div>
+
+      <!-- Tab 2: Loan EMI Calculator -->
+      <div id="tab-emi" class="calc-tab-panel" style="display: none;">
+        <div class="calc-input-group">
+          <label>Loan Principal: <strong id="emi-amount-display">₹40,00,000</strong></label>
+          <input type="range" id="emi-amount-slider" min="100000" max="20000000" step="100000" value="4000000" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Interest Rate (% p.a.): <strong id="emi-rate-display">8.5%</strong></label>
+          <input type="range" id="emi-rate-slider" min="6.5" max="18" step="0.1" value="8.5" class="calc-slider" />
+        </div>
+        <div class="calc-input-group">
+          <label>Tenure: <strong id="emi-years-display">20 Years</strong></label>
+          <input type="range" id="emi-years-slider" min="1" max="30" step="1" value="20" class="calc-slider" />
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-stat">
+            <span>Monthly EMI</span>
+            <strong id="emi-monthly-res" class="text-cyan">₹34,713</strong>
+          </div>
+          <div class="calc-result-stat">
+            <span>Total Interest</span>
+            <strong id="emi-interest-res">₹43,31,101</strong>
+          </div>
+          <div class="calc-result-stat total">
+            <span>Total Payment</span>
+            <strong id="emi-total-res">₹83,31,101</strong>
+          </div>
+        </div>
+
+        <button id="emi-ask-ai-btn" class="pinterest-submit-btn" style="margin-top: 14px;">
+          <span>Analyze Loan Prepayment Hacks with AI</span>
+        </button>
+      </div>
+
+      <!-- Tab 3: 50/30/20 Budget Allocator -->
+      <div id="tab-budget" class="calc-tab-panel" style="display: none;">
+        <div class="calc-input-group">
+          <label>Monthly Take-Home Salary: <strong id="budget-income-display">₹75,000</strong></label>
+          <input type="range" id="budget-income-slider" min="15000" max="500000" step="5000" value="75000" class="calc-slider" />
+        </div>
+
+        <div class="calc-results-box">
+          <div class="calc-result-stat">
+            <span>Needs (50%)</span>
+            <strong id="budget-needs-res">₹37,500</strong>
+          </div>
+          <div class="calc-result-stat">
+            <span>Wants (30%)</span>
+            <strong id="budget-wants-res">₹22,500</strong>
+          </div>
+          <div class="calc-result-stat total">
+            <span>Savings & Investments (20%)</span>
+            <strong id="budget-savings-res" class="text-emerald">₹15,000</strong>
+          </div>
+        </div>
+
+        <button id="budget-ask-ai-btn" class="pinterest-submit-btn" style="margin-top: 14px;">
+          <span>Ask ArthaAI to Create a Detailed Budget</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Pinterest-Style Authentication Modal -->

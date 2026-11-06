@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in with Google - Choose an account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #202124;
+      color: #e8eaed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .google-card {
+      background: #202124;
+      border: 1px solid #3c4043;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 448px;
+      padding: 40px 36px 36px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .google-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 1.33;
+      text-align: center;
+      color: #e8eaed;
+      margin-bottom: 8px;
+    }
+    .card-subtitle {
+      font-size: 16px;
+      font-weight: 400;
+      color: #9aa0a6;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .card-subtitle strong {
+      color: #8ab4f8;
+      font-weight: 500;
+    }
+    .accounts-list {
+      list-style: none;
+      border-top: 1px solid #3c4043;
+      margin-bottom: 24px;
+    }
+    .account-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 12px;
+      border-bottom: 1px solid #3c4043;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+      border-radius: 4px;
+    }
+    .account-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .account-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #8ab4f8;
+      color: #202124;
+      font-size: 18px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+    .account-avatar.green { background: #34a853; color: #fff; }
+    .account-avatar.purple { background: #af5cf7; color: #fff; }
+    .account-avatar.icon {
+      background: transparent;
+      border: 1px solid #5f6368;
+      color: #8ab4f8;
+    }
+    .account-details {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+    .account-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e8eaed;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .account-email {
+      font-size: 12px;
+      color: #9aa0a6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .use-another-form {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #3c4043;
+    }
+    .input-field {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #5f6368;
+      border-radius: 4px;
+      padding: 12px 14px;
+      color: #e8eaed;
+      font-size: 14px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: #8ab4f8;
+    }
+    .submit-btn {
+      background: #8ab4f8;
+      color: #202124;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      float: right;
+    }
+    .submit-btn:hover {
+      background: #aecbfa;
+    }
+    .footer-disclaimer {
+      font-size: 12px;
+      line-height: 1.4;
+      color: #9aa0a6;
+      margin-top: 24px;
+    }
+    .footer-disclaimer a {
+      color: #8ab4f8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="google-card">
+    <div class="google-logo">
+      <svg width="48" height="48" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+      </svg>
+    </div>
+
+    <h1 class="card-title">Choose an account</h1>
+    <p class="card-subtitle">to continue to <strong>ArthaAI</strong></p>
+
+    <ul class="accounts-list">
+      <li class="account-item" onclick="selectGoogleAccount('Jeevan Rishi', 'jeevanrishi@gmail.com')">
+        <div class="account-avatar">J</div>
+        <div class="account-details">
+          <span class="account-name">Jeevan Rishi</span>
+          <span class="account-email">jeevanrishi@gmail.com</span>
+        </div>
+      </li>
+
+      <li class="account-item" onclick="selectGoogleAccount('Aarav Sharma', 'aarav.sharma@gmail.com')">
+        <div class="account-avatar green">A</div>
+        <div class="account-details">
+          <span class="account-name">Aarav Sharma</span>
+          <span class="account-email">aarav.sharma@gmail.com</span>
+        </div>
+      </li>
+
+      <li class="account-item" onclick="toggleCustomInput()">
+        <div class="account-avatar icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="account-details">
+          <span class="account-name">Use another account</span>
+        </div>
+      </li>
+    </ul>
+
+    <div id="custom-account-form" class="use-another-form">
+      <input type="text" id="custom-name" class="input-field" placeholder="Full name (e.g. Priya Patel)" />
+      <input type="email" id="custom-email" class="input-field" placeholder="Email address" required />
+      <button type="button" class="submit-btn" onclick="submitCustomAccount()">Next</button>
+    </div>
+
+    <div class="footer-disclaimer">
+      To continue, Google will share your name, email address, language preference, and profile picture with ArthaAI.
+    </div>
+  </div>
+
+  <script>
+    async function selectGoogleAccount(name, email) {
+      try {
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_profile: {
+              name: name,
+              email: email,
+              google_id: 'google_' + Math.abs(email.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0)),
+              avatar_url: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0ea5e9&color=fff'
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.token) {
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({
+              type: 'GOOGLE_AUTH_SUCCESS',
+              token: data.token,
+              user: data.user
+            }, window.location.origin);
+            window.close();
+          } else {
+            localStorage.setItem('arthafin_auth_token', data.token);
+            localStorage.setItem('arthafin_user_profile', JSON.stringify(data.user));
+            window.location.href = '/';
+          }
+        }
+      } catch (err) {
+        alert('Authentication failed: ' + err.message);
+      }
+    }
+
+    function toggleCustomInput() {
+      const form = document.getElementById('custom-account-form');
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';
+      if (form.style.display === 'block') {
+        document.getElementById('custom-email').focus();
+      }
+    }
+
+    function submitCustomAccount() {
+      const email = document.getElementById('custom-email').value.trim();
+      let name = document.getElementById('custom-name').value.trim();
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid Google email.');
+        return;
+      }
+      if (!name) name = email.split('@')[0];
+      selectGoogleAccount(name, email);
+    }
+  </script>
+</body>
+</html>
+

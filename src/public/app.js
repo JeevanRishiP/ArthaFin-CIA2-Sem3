@@ -1073,4 +1073,218 @@ document.addEventListener('DOMContentLoaded', () => {
 
     return parsed;
   }
+
+  /* ==========================================================================
+     Financial Quick Calculators Logic (SIP, Loan EMI, 50/30/20 Budget)
+     ========================================================================== */
+  const calcToggleBtn = document.getElementById('calc-toggle-btn');
+  const calcModal = document.getElementById('calc-modal');
+  const calcModalClose = document.getElementById('calc-modal-close');
+  const calcTabBtns = document.querySelectorAll('.calc-tab-btn');
+  const calcTabPanels = {
+    sip: document.getElementById('tab-sip'),
+    emi: document.getElementById('tab-emi'),
+    budget: document.getElementById('tab-budget'),
+  };
+
+  function formatINR(val) {
+    return '₹' + Math.round(val).toLocaleString('en-IN');
+  }
+
+  if (calcToggleBtn && calcModal) {
+    calcToggleBtn.addEventListener('click', () => {
+      calcModal.style.display = 'flex';
+      calculateSIP();
+      calculateEMI();
+      calculateBudget();
+    });
+
+    if (calcModalClose) {
+      calcModalClose.addEventListener('click', () => {
+        calcModal.style.display = 'none';
+      });
+    }
+
+    calcModal.addEventListener('click', (e) => {
+      if (e.target === calcModal) calcModal.style.display = 'none';
+    });
+  }
+
+  calcTabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      calcTabBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.dataset.tab;
+      Object.entries(calcTabPanels).forEach(([key, panel]) => {
+        if (panel) panel.style.display = key === target ? 'flex' : 'none';
+      });
+    });
+  });
+
+  // 1. SIP Calculator
+  const sipAmtSlider = document.getElementById('sip-amount-slider');
+  const sipRateSlider = document.getElementById('sip-rate-slider');
+  const sipYearsSlider = document.getElementById('sip-years-slider');
+
+  function calculateSIP() {
+    if (!sipAmtSlider || !sipRateSlider || !sipYearsSlider) return;
+    const P = parseFloat(sipAmtSlider.value);
+    const cagr = parseFloat(sipRateSlider.value);
+    const years = parseFloat(sipYearsSlider.value);
+
+    const amtDisp = document.getElementById('sip-amount-display');
+    const rateDisp = document.getElementById('sip-rate-display');
+    const yearsDisp = document.getElementById('sip-years-display');
+    if (amtDisp) amtDisp.textContent = formatINR(P);
+    if (rateDisp) rateDisp.textContent = `${cagr}%`;
+    if (yearsDisp) yearsDisp.textContent = `${years} Years`;
+
+    const i = (cagr / 100) / 12;
+    const n = years * 12;
+    const invested = P * n;
+    const total = P * ((Math.pow(1 + i, n) - 1) / i) * (1 + i);
+    const returns = total - invested;
+
+    const invRes = document.getElementById('sip-invested-res');
+    const retRes = document.getElementById('sip-returns-res');
+    const totRes = document.getElementById('sip-total-res');
+    if (invRes) invRes.textContent = formatINR(invested);
+    if (retRes) retRes.textContent = formatINR(returns);
+    if (totRes) totRes.textContent = formatINR(total);
+  }
+
+  [sipAmtSlider, sipRateSlider, sipYearsSlider].forEach((slider) => {
+    if (slider) slider.addEventListener('input', calculateSIP);
+  });
+
+  // 2. Loan EMI Calculator
+  const emiAmtSlider = document.getElementById('emi-amount-slider');
+  const emiRateSlider = document.getElementById('emi-rate-slider');
+  const emiYearsSlider = document.getElementById('emi-years-slider');
+
+  function calculateEMI() {
+    if (!emiAmtSlider || !emiRateSlider || !emiYearsSlider) return;
+    const P = parseFloat(emiAmtSlider.value);
+    const annualRate = parseFloat(emiRateSlider.value);
+    const years = parseFloat(emiYearsSlider.value);
+
+    const amtDisp = document.getElementById('emi-amount-display');
+    const rateDisp = document.getElementById('emi-rate-display');
+    const yearsDisp = document.getElementById('emi-years-display');
+    if (amtDisp) amtDisp.textContent = formatINR(P);
+    if (rateDisp) rateDisp.textContent = `${annualRate}%`;
+    if (yearsDisp) yearsDisp.textContent = `${years} Years`;
+
+    const r = (annualRate / 100) / 12;
+    const n = years * 12;
+    const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    const totalPayment = emi * n;
+    const totalInterest = totalPayment - P;
+
+    const mRes = document.getElementById('emi-monthly-res');
+    const intRes = document.getElementById('emi-interest-res');
+    const totRes = document.getElementById('emi-total-res');
+    if (mRes) mRes.textContent = formatINR(emi);
+    if (intRes) intRes.textContent = formatINR(totalInterest);
+    if (totRes) totRes.textContent = formatINR(totalPayment);
+  }
+
+  [emiAmtSlider, emiRateSlider, emiYearsSlider].forEach((slider) => {
+    if (slider) slider.addEventListener('input', calculateEMI);
+  });
+
+  // 3. 50/30/20 Budget Calculator
+  const budgetIncomeSlider = document.getElementById('budget-income-slider');
+
+  function calculateBudget() {
+    if (!budgetIncomeSlider) return;
+    const income = parseFloat(budgetIncomeSlider.value);
+    const incDisp = document.getElementById('budget-income-display');
+    if (incDisp) incDisp.textContent = formatINR(income);
+
+    const needs = income * 0.50;
+    const wants = income * 0.30;
+    const savings = income * 0.20;
+
+    const nRes = document.getElementById('budget-needs-res');
+    const wRes = document.getElementById('budget-wants-res');
+    const sRes = document.getElementById('budget-savings-res');
+    if (nRes) nRes.textContent = formatINR(needs);
+    if (wRes) wRes.textContent = formatINR(wants);
+    if (sRes) sRes.textContent = formatINR(savings);
+  }
+
+  if (budgetIncomeSlider) budgetIncomeSlider.addEventListener('input', calculateBudget);
+
+  // Ask AI prefill handlers
+  const sipAskBtn = document.getElementById('sip-ask-ai-btn');
+  if (sipAskBtn) {
+    sipAskBtn.addEventListener('click', () => {
+      const p = sipAmtSlider.value;
+      const r = sipRateSlider.value;
+      const y = sipYearsSlider.value;
+      if (calcModal) calcModal.style.display = 'none';
+      chatInput.value = `I am planning a SIP of ₹${parseInt(p, 10).toLocaleString('en-IN')}/month for ${y} years at an expected CAGR of ${r}%. Can you analyze which asset allocation (e.g., Large-cap index vs Flexi-cap) suits this horizon and how step-up SIP could boost my final wealth?`;
+      chatInput.focus();
+      handleSend();
+    });
+  }
+
+  const emiAskBtn = document.getElementById('emi-ask-ai-btn');
+  if (emiAskBtn) {
+    emiAskBtn.addEventListener('click', () => {
+      const p = emiAmtSlider.value;
+      const r = emiRateSlider.value;
+      const y = emiYearsSlider.value;
+      if (calcModal) calcModal.style.display = 'none';
+      chatInput.value = `I am considering a loan of ₹${parseInt(p, 10).toLocaleString('en-IN')} at ${r}% interest for ${y} years. What are the best strategies to prepay this loan faster and save interest?`;
+      chatInput.focus();
+      handleSend();
+    });
+  }
+
+  const budgetAskBtn = document.getElementById('budget-ask-ai-btn');
+  if (budgetAskBtn) {
+    budgetAskBtn.addEventListener('click', () => {
+      const inc = budgetIncomeSlider.value;
+      if (calcModal) calcModal.style.display = 'none';
+      chatInput.value = `My monthly take-home income is ₹${parseInt(inc, 10).toLocaleString('en-IN')}. Based on the 50/30/20 rule, help me break down an actionable monthly budget covering rent, groceries, discretionary spending, emergency fund, and mutual funds.`;
+      chatInput.focus();
+      handleSend();
+    });
+  }
+
+  // Export conversation as Markdown (.md)
+  const exportBtn = document.getElementById('export-chat-btn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      const envelopes = chatMessagesContainer.querySelectorAll('.message-envelope');
+      if (envelopes.length === 0) {
+        showToast('No messages to export yet.');
+        return;
+      }
+
+      let markdown = `# ArthaAI Financial Advisory Session Transcript\n`;
+      markdown += `*Generated on: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} (IST)*\n\n---\n\n`;
+
+      envelopes.forEach((env) => {
+        const isUser = env.classList.contains('user');
+        const role = isUser ? '👤 User' : '🤖 ArthaAI (Advisor)';
+        const textContent = env.querySelector('.message-bubble')?.innerText || '';
+        markdown += `### ${role}\n\n${textContent.trim()}\n\n---\n\n`;
+      });
+
+      const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `arthafin_transcript_${Date.now()}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Conversation exported as Markdown.');
+    });
+  }
+
 });

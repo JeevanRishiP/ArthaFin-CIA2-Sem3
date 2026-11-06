@@ -1200,6 +1200,192 @@ html, body {
 }
 
 /* ==========================================================================
+   Financial Quick Calculators Modal & Sliders
+   ========================================================================== */
+.calc-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-modal);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-modal);
+  border-radius: var(--radius-xl);
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.calc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calc-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calc-header-title h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.calc-icon {
+  font-size: 1.3rem;
+}
+
+.calc-tabs {
+  display: flex;
+  background: #101118;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.calc-tab-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.calc-tab-btn:hover {
+  color: var(--text-secondary);
+}
+
+.calc-tab-btn.active {
+  background: #232535;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.calc-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calc-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calc-input-group label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.calc-input-group label strong {
+  color: var(--text-cyan);
+  font-weight: 600;
+  font-feature-settings: "tnum";
+}
+
+.calc-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #262838;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+.calc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.calc-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #8b5cf6;
+}
+
+.calc-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+}
+
+.calc-results-box {
+  margin-top: 6px;
+  background: #101118;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calc-result-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.calc-result-stat strong {
+  color: var(--text-main);
+  font-weight: 600;
+  font-feature-settings: "tnum";
+}
+
+.calc-result-stat.total {
+  border-top: 1px dashed var(--border-subtle);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+
+.calc-result-stat.total span {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.calc-result-stat.total strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.text-emerald {
+  color: #10b981 !important;
+}
+
+.text-cyan {
+  color: #06b6d4 !important;
+}
+
+/* ==========================================================================
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 900px) {
