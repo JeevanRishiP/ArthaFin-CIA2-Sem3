@@ -273,21 +273,16 @@ export const registerWithEmail = async (req: Request, res: Response): Promise<vo
  * GET /api/auth/google/start
  */
 export const startGoogleOAuth = async (req: Request, res: Response): Promise<void> => {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientId = process.env.GOOGLE_CLIENT_ID || '';
   const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
   const redirectUri = `${appUrl}/api/auth/google/callback`;
-
-  if (!clientId || clientId.includes('YOUR_GOOGLE_CLIENT_ID')) {
-    // If client ID is not configured, redirect to a beautiful accounts selector screen
-    res.redirect(`/google-oauth-select.html?redirect_uri=${encodeURIComponent(redirectUri)}`);
-    return;
-  }
 
   const state = jwt.sign({ timestamp: Date.now() }, JWT_SECRET, { expiresIn: '15m' });
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
     clientId
   )}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=select_account&state=${state}`;
 
+  // Redirect directly to real Google Accounts (accounts.google.com)
   res.redirect(googleAuthUrl);
 };
 
@@ -384,12 +379,17 @@ export const handleGoogleCallback = async (req: Request, res: Response): Promise
             token: ${JSON.stringify(token)},
             user: ${JSON.stringify(user)}
           };
+          localStorage.setItem('arthafin_token', ${JSON.stringify(token)});
+          localStorage.setItem('arthafin_user', JSON.stringify(${JSON.stringify(user)}));
+
           if (window.opener && !window.opener.closed) {
-            window.opener.postMessage(authData, window.location.origin);
-            window.close();
+            try {
+              window.opener.postMessage(authData, '*');
+            } catch (e) {
+              console.warn('postMessage to opener failed:', e);
+            }
+            setTimeout(() => window.close(), 200);
           } else {
-            localStorage.setItem('arthafin_auth_token', ${JSON.stringify(token)});
-            localStorage.setItem('arthafin_user_profile', JSON.stringify(${JSON.stringify(user)}));
             window.location.href = '/';
           }
         </script>

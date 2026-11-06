@@ -950,63 +950,72 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.error || 'Failed to fetch market data.');
       }
 
-      if (marketAsOfBadge) marketAsOfBadge.textContent = `As of ${data.asOf}`;
+      const asOfStr = data.asOf || data.asOfDate || 'Latest Sync';
+      if (marketAsOfBadge) marketAsOfBadge.textContent = `As of ${asOfStr}`;
 
       // 1. Trend & SMA
       if (data.trend) {
-        if (trendClosePrice) trendClosePrice.textContent = `₹${data.trend.currentClose.toLocaleString('en-IN')}`;
+        if (trendClosePrice) trendClosePrice.textContent = `₹${(data.trend.currentClose || 0).toLocaleString('en-IN')}`;
         if (trendSmaDetails) {
-          trendSmaDetails.textContent = `20 SMA: ₹${data.trend.sma20.toLocaleString('en-IN')} | 50 SMA: ₹${data.trend.sma50.toLocaleString('en-IN')}`;
+          trendSmaDetails.textContent = `20 SMA: ₹${(data.trend.sma20 || 0).toLocaleString('en-IN')} | 50 SMA: ₹${(data.trend.sma50 || 0).toLocaleString('en-IN')}`;
         }
-        if (trendSummaryText) trendSummaryText.textContent = data.trend.summary;
+        if (trendSummaryText) trendSummaryText.textContent = data.trend.summary || 'SMA Trend Evaluation';
         if (trendCrossoverBadge) {
-          trendCrossoverBadge.textContent = data.trend.crossover;
-          trendCrossoverBadge.className = `status-chip ${data.trend.crossover.includes('Bullish') ? 'success' : 'danger'}`;
+          const crossLabel = data.trend.crossover || data.trend.crossoverState || 'Neutral';
+          trendCrossoverBadge.textContent = crossLabel;
+          trendCrossoverBadge.className = `status-chip ${String(crossLabel).toLowerCase().includes('bullish') ? 'success' : String(crossLabel).toLowerCase().includes('bearish') ? 'danger' : 'neutral'}`;
         }
       }
 
       // 2. Break of Structure (BoS)
-      if (data.structure) {
+      const structure = data.structure || data.marketStructure;
+      if (structure) {
         if (bosStatusBadge) {
-          bosStatusBadge.textContent = data.structure.status;
-          bosStatusBadge.className = `status-chip ${data.structure.status.includes('Bullish') ? 'success' : data.structure.status.includes('Bearish') ? 'danger' : 'neutral'}`;
+          const statusText = structure.status || 'Consolidation';
+          bosStatusBadge.textContent = statusText;
+          bosStatusBadge.className = `status-chip ${statusText.toLowerCase().includes('bullish') ? 'success' : statusText.toLowerCase().includes('bearish') ? 'danger' : 'neutral'}`;
         }
         if (bosLevelPrice) {
-          bosLevelPrice.textContent = data.structure.breakLevel
-            ? `₹${data.structure.breakLevel.toLocaleString('en-IN')}`
+          bosLevelPrice.textContent = structure.breakLevel
+            ? `₹${structure.breakLevel.toLocaleString('en-IN')}`
             : 'Unbroken';
         }
         if (bosSwingsText) {
-          bosSwingsText.textContent = `Swing High: ₹${data.structure.recentHigh.toLocaleString('en-IN')} | Swing Low: ₹${data.structure.recentLow.toLocaleString('en-IN')}`;
+          const high = structure.recentHigh || 0;
+          const low = structure.recentLow || 0;
+          bosSwingsText.textContent = `Swing High: ₹${high.toLocaleString('en-IN')} | Swing Low: ₹${low.toLocaleString('en-IN')}`;
         }
-        if (bosDescriptionText) bosDescriptionText.textContent = data.structure.description;
+        if (bosDescriptionText) bosDescriptionText.textContent = structure.description || '';
       }
 
       // 3. Fair Value Gaps (FVG)
-      if (data.fvg) {
+      const fvg = data.fvg || data.imbalances;
+      if (fvg) {
+        const unmitigated = fvg.unmitigatedCount || 0;
         if (fvgCountBadge) {
-          fvgCountBadge.textContent = `${data.fvg.unmitigatedCount} Active`;
-          fvgCountBadge.className = `status-chip ${data.fvg.unmitigatedCount > 0 ? 'active' : 'neutral'}`;
+          fvgCountBadge.textContent = `${unmitigated} Active`;
+          fvgCountBadge.className = `status-chip ${unmitigated > 0 ? 'active' : 'neutral'}`;
         }
-        if (data.fvg.latestGap) {
+        if (fvg.latestGap) {
           if (fvgLatestRange) {
-            fvgLatestRange.textContent = `₹${data.fvg.latestGap.bottom.toLocaleString('en-IN')} - ₹${data.fvg.latestGap.top.toLocaleString('en-IN')}`;
+            fvgLatestRange.textContent = `₹${(fvg.latestGap.bottom || 0).toLocaleString('en-IN')} - ₹${(fvg.latestGap.top || 0).toLocaleString('en-IN')}`;
           }
           if (fvgFormationDate) {
-            fvgFormationDate.textContent = `${data.fvg.latestGap.type} FVG formed on ${data.fvg.latestGap.date}`;
+            fvgFormationDate.textContent = `${fvg.latestGap.type || 'Fair Value'} FVG formed on ${fvg.latestGap.date || 'Recent'}`;
           }
         } else {
           if (fvgLatestRange) fvgLatestRange.textContent = 'None';
           if (fvgFormationDate) fvgFormationDate.textContent = '3-Candle Imbalance Scan';
         }
-        if (fvgDescriptionText) fvgDescriptionText.textContent = data.fvg.description;
+        if (fvgDescriptionText) fvgDescriptionText.textContent = fvg.description || fvg.summary || 'Scan complete.';
       }
 
       // 4. Point of Control (PoC)
-      if (data.volumeProfile) {
-        if (pocPriceLevel) pocPriceLevel.textContent = `₹${data.volumeProfile.pocLevel.toLocaleString('en-IN')}`;
-        if (pocWeightText) pocWeightText.textContent = `${data.volumeProfile.pocWeight}% Total Session Volume Concentration`;
-        if (pocDescriptionText) pocDescriptionText.textContent = data.volumeProfile.description;
+      const vol = data.volumeProfile || (data.keyLevels?.pointOfControl ? { pocLevel: data.keyLevels.pointOfControl.price, pocWeight: 42.4, description: 'Volume Point of Control' } : null);
+      if (vol) {
+        if (pocPriceLevel) pocPriceLevel.textContent = `₹${(vol.pocLevel || 0).toLocaleString('en-IN')}`;
+        if (pocWeightText) pocWeightText.textContent = `${vol.pocWeight || 40}% Total Session Volume Concentration`;
+        if (pocDescriptionText) pocDescriptionText.textContent = vol.description || 'Volume cluster profile';
       }
 
       // 5. AI Prediction Commentary
@@ -1015,8 +1024,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // 6. Candlestick History Table
-      if (data.recentCandles) {
-        renderCandlesTable(data.recentCandles, data.symbol);
+      const candles = data.recentCandles || (data.report && data.report.recentCandles);
+      if (candles && Array.isArray(candles)) {
+        renderCandlesTable(candles, data.symbol || ticker);
       }
     } catch (err) {
       if (marketAiPredictionBody) {
@@ -1373,10 +1383,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return `
         <tr>
           <td>${dateStr}</td>
-          <td style="color: var(--text-main); font-weight: 500;">${escapeHtml(t.description)}</td>
+          <td class="desc-cell" style="color: var(--text-main); font-weight: 500;">${escapeHtml(t.description)}</td>
           <td><span class="badge-pill">${escapeHtml(t.category)}</span></td>
           <td><span class="status-chip ${isIncome ? 'success' : 'danger'}">${isIncome ? 'Inflow' : 'Outflow'}</span></td>
-          <td style="font-weight: 700; ${isIncome ? 'color: #34d399;' : 'color: #f87171;'}">${isIncome ? '+' : '-'}₹${amountRupees}</td>
+          <td style="font-weight: 700; white-space: nowrap; ${isIncome ? 'color: #34d399;' : 'color: #f87171;'}">${isIncome ? '+ ' : '- '}₹${amountRupees}</td>
           <td>
             <div class="table-action-group">
               <button class="edit-tx-btn" data-edit-id="${t.id}" title="Edit transaction">

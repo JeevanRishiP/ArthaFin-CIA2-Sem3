@@ -1812,12 +1812,16 @@ html, body {
 
 /* Status Chips & Badges */
 .status-chip {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   padding: 3px 10px;
   border-radius: var(--radius-full);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 .status-chip.success {
@@ -1851,6 +1855,9 @@ html, body {
 }
 
 .badge-pill {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   padding: 4px 12px;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
@@ -1858,6 +1865,7 @@ html, body {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-glass);
   color: var(--text-secondary);
+  line-height: 1.2;
 }
 
 .badge-pill.danger {
@@ -1936,6 +1944,13 @@ html, body {
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-main);
   font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.glass-data-table td.desc-cell {
+  white-space: normal;
+  font-family: var(--font-main);
+  min-width: 220px;
 }
 
 .glass-data-table tbody tr:hover {
