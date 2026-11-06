@@ -26,20 +26,29 @@ const publicDir = fs.existsSync(primaryPublicDir) ? primaryPublicDir : fallbackP
 
 app.use(express.static(publicDir));
 
-// API Routes
+// API Routes (mounted under both /api/* and root /* for Vercel serverless rewrite compatibility)
 app.use('/api/chat', chatRoutes);
+app.use('/chat', chatRoutes);
+
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/market', marketRoutes);
+app.use('/market', marketRoutes);
+
 app.use('/api/finance', financeRoutes);
+app.use('/finance', financeRoutes);
 
 // Health check endpoint
-app.get('/api/health', (_req: Request, res: Response) => {
+const handleHealth = (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'AI-Powered Financial Chatbot API',
   });
-});
+};
+app.get('/api/health', handleHealth);
+app.get('/health', handleHealth);
 
 // Fallback to index.html for unmatched routes
 app.use((_req: Request, res: Response) => {
