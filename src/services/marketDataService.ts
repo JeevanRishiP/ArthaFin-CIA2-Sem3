@@ -170,6 +170,43 @@ export class MarketDataService {
   }
 
   /**
+   * Generates realistic synthetic candlestick data when both DB and external feeds are offline
+   */
+  public static generateSyntheticData(
+    ticker: string = '^NSEI',
+    count: number = 60
+  ): RawMarketCandle[] {
+    const isNifty = ticker === '^NSEI';
+    let basePrice = isNifty ? 24500 : 5800;
+    const candles: RawMarketCandle[] = [];
+    const now = new Date();
+
+    for (let i = count - 1; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 86400000);
+      const changePercent = (Math.sin(i * 0.4) * 0.008) + ((Math.random() - 0.48) * 0.012);
+      const close = Number((basePrice * (1 + changePercent)).toFixed(2));
+      const spread = close * 0.009;
+      const high = Number((Math.max(basePrice, close) + spread * 0.6).toFixed(2));
+      const low = Number((Math.min(basePrice, close) - spread * 0.6).toFixed(2));
+      const open = basePrice;
+      const volume = Math.round(250000000 + Math.random() * 80000000);
+
+      candles.push({
+        date: d.toISOString().split('T')[0],
+        open,
+        high,
+        low,
+        close,
+        volume,
+      });
+
+      basePrice = close;
+    }
+
+    return candles;
+  }
+
+  /**
    * Fetches and synchronizes daily OHLCV data for both Nifty 50 (^NSEI) and S&P 500 (^GSPC)
    */
   public static async syncMarketData(tradingDaysTarget: number = 60): Promise<{

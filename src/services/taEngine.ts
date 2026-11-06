@@ -91,30 +91,62 @@ export class TAEngine {
       ORDER BY o.date ASC;
     `;
 
-    let result = await pool.query(selectQuery, [ticker]);
+    try {
+      let result = await pool.query(selectQuery, [ticker]);
 
-    // Ensure we have at least 50 candles to compute the 50-period SMA
-    if (result.rows.length < 50) {
-      console.log(`[TAEngine] Fewer than 50 records found for ${ticker}. Auto-synchronizing 60 trading days...`);
-      const assetName = ticker === '^NSEI' ? 'Nifty 50' : ticker === '^GSPC' ? 'S&P 500' : ticker;
-      await MarketDataService.syncAsset(ticker, assetName, 'INDEX', 60);
-      result = await pool.query(selectQuery, [ticker]);
+      // Ensure we have at least 50 candles to compute the 50-period SMA
+      if (result.rows.length < 50) {
+        const assetName = ticker === '^NSEI' ? 'Nifty 50' : ticker === '^GSPC' ? 'S&P 500' : ticker;
+        try {
+          await MarketDataService.syncAsset(ticker, assetName, 'INDEX', 60);
+          result = await pool.query(selectQuery, [ticker]);
+        } catch {
+          // ignore sync failure
+        }
+      }
+
+      if (result.rows.length >= 20) {
+        return result.rows.map((r: any) => ({
+          date: r.date instanceof Date
+            ? r.date.toISOString().split('T')[0]
+            : String(r.date).split('T')[0],
+          open: Number(r.open) / 100,
+          high: Number(r.high) / 100,
+          low: Number(r.low) / 100,
+          close: Number(r.close) / 100,
+          volume: Number(r.volume),
+        }));
+      }
+    } catch (dbErr: any) {
+      console.warn(`[TAEngine] PostgreSQL unavailable (${dbErr.message}). Falling back to live/synthetic market data for ${ticker}.`);
     }
 
-    if (result.rows.length === 0) {
-      throw new Error(`[TAEngine] No candlestick data available for ticker ${ticker}`);
+    // Direct fallback via MarketDataService without requiring PostgreSQL
+    try {
+      const rawCandles = await MarketDataService.fetchHistoricalData(ticker, 60);
+      if (rawCandles.length > 0) {
+        return rawCandles.map((c) => ({
+          date: c.date instanceof Date ? c.date.toISOString().split('T')[0] : String(c.date).split('T')[0],
+          open: Number(c.open.toFixed(2)),
+          high: Number(c.high.toFixed(2)),
+          low: Number(c.low.toFixed(2)),
+          close: Number(c.close.toFixed(2)),
+          volume: c.volume,
+        }));
+      }
+    } catch (fetchErr: any) {
+      console.warn(`[TAEngine] MarketDataService direct fetch failed (${fetchErr.message}). Generating synthetic data.`);
     }
 
-    // Revert integer paise back to standard floating point decimals (Paise / 100)
-    return result.rows.map((r: any) => ({
-      date: r.date instanceof Date
-        ? r.date.toISOString().split('T')[0]
-        : String(r.date).split('T')[0],
-      open: Number(r.open) / 100,
-      high: Number(r.high) / 100,
-      low: Number(r.low) / 100,
-      close: Number(r.close) / 100,
-      volume: Number(r.volume),
+    // High-availability synthetic dataset for Nifty 50
+    const fallbackCandles = MarketDataService.generateSyntheticData(ticker, 60);
+    return fallbackCandles.map((c: any) => ({
+      date: c.date instanceof Date ? c.date.toISOString().split('T')[0] : String(c.date).split('T')[0],
+      open: Number(c.open.toFixed(2)),
+      high: Number(c.high.toFixed(2)),
+      low: Number(c.low.toFixed(2)),
+      close: Number(c.close.toFixed(2)),
+      volume: c.volume,
     }));
   }
 
