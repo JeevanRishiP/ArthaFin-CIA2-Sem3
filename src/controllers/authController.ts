@@ -269,17 +269,40 @@ export const registerWithEmail = async (req: Request, res: Response): Promise<vo
 };
 
 /**
- * 4. Google OAuth: Start Redirect to Google Accounts Page
+ * 4. Google OAuth: Start Redirect to Real Google Accounts Page (accounts.google.com)
  * GET /api/auth/google/start
  */
 export const startGoogleOAuth = async (req: Request, res: Response): Promise<void> => {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
   const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
   const redirectUri = `${appUrl}/api/auth/google/callback`;
 
   if (!clientId || clientId.includes('YOUR_GOOGLE_CLIENT_ID')) {
-    // If client ID is not configured, redirect to a beautiful accounts selector screen
-    res.redirect(`/google-oauth-select.html?redirect_uri=${encodeURIComponent(redirectUri)}`);
+    res.status(400).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Google OAuth Configuration Required</title>
+        <style>
+          body { background: #07090e; color: #f8fafc; font-family: -apple-system, system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; padding: 20px; }
+          .card { background: rgba(18, 24, 38, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 36px; max-width: 520px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+          h2 { margin-bottom: 12px; color: #38bdf8; }
+          p { color: #94a3b8; font-size: 0.92rem; line-height: 1.6; margin-bottom: 20px; }
+          code { background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 6px; font-family: monospace; color: #34d399; }
+          .btn { background: linear-gradient(135deg, #0284c7, #4f46e5); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 9999px; font-weight: 600; display: inline-block; font-size: 0.88rem; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2>Real Google OAuth 2.0 Configuration Required</h2>
+          <p>To open the official <code>accounts.google.com</code> authentication screen, please configure your Google Cloud Console credentials in your <code>.env</code> file:</p>
+          <p><code>GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com<br>GOOGLE_CLIENT_SECRET=your_google_client_secret</code></p>
+          <p>Make sure your Authorized Redirect URI is set to: <br><code>${redirectUri}</code></p>
+          <a href="/" class="btn">Return to ArthaAI</a>
+        </div>
+      </body>
+      </html>
+    `);
     return;
   }
 

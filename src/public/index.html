@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Official Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="vision-dark-theme">
@@ -99,6 +101,19 @@
 
       <!-- User Account Widget at Bottom of Sidebar -->
       <div class="sidebar-user-anchor">
+        <div id="sidebar-guest-card" class="sidebar-glass-card" style="display: none;">
+          <div class="user-row">
+            <div class="user-avatar-circle" style="background: rgba(255,255,255,0.1); color: var(--text-muted);">?</div>
+            <div class="user-text-meta">
+              <span class="user-display-name">Guest User</span>
+              <span class="user-display-email">Sign in for cloud sync</span>
+            </div>
+          </div>
+          <button id="sidebar-login-trigger" class="glass-action-pill" style="width: 100%; margin-top: 10px; justify-content: center; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8;">
+            <span>Sign In / Register</span>
+          </button>
+        </div>
+
         <div id="sidebar-user-card" class="sidebar-glass-card user-logged-in">
           <div class="user-row">
             <div class="user-avatar-circle" id="sidebar-user-avatar">R</div>
@@ -115,12 +130,15 @@
               </svg>
               <span>Reload</span>
             </button>
+            <button id="sidebar-signout-btn" class="glass-action-pill" title="Switch account or sign out">
+              <span>Sign Out</span>
+            </button>
             <button id="clear-db-history-btn" class="glass-action-pill danger" title="Clear conversation in PostgreSQL">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M3 6h18"></path>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
               </svg>
-              <span>Clear All</span>
+              <span>Clear</span>
             </button>
           </div>
         </div>
@@ -167,7 +185,11 @@
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
           </button>
-          <div class="header-user-badge">
+          <!-- Authentication Controls in Header -->
+          <button id="header-login-btn" class="glass-action-pill" style="display: none; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 600; padding: 6px 14px;" title="Sign In or Register">
+            <span>Sign In</span>
+          </button>
+          <div class="header-user-badge" id="header-user-badge">
             <div class="user-capsule-avatar" id="header-avatar">R</div>
             <span class="user-capsule-name" id="header-name">Rohan Sharma</span>
           </div>
@@ -602,6 +624,161 @@
           <span>Save Transaction</span>
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- Pinterest-Style Authentication Modal (Real Google OAuth 2.0 + Dynamic Email Detection) -->
+  <div id="auth-modal" class="auth-modal-backdrop" style="display: none;">
+    <div class="auth-glass-card">
+      <button id="auth-modal-close" class="modal-close-icon" title="Close">✕</button>
+
+      <div class="auth-card-brand">
+        <div class="brand-sparkle-halo" style="margin: 0 auto 10px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#auth-sparkle-grad)"/>
+            <defs>
+              <linearGradient id="auth-sparkle-grad" x1="2" y1="2" x2="22" y2="22">
+                <stop stop-color="#38bdf8"/>
+                <stop offset="0.5" stop-color="#818cf8"/>
+                <stop offset="1" stop-color="#34d399"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h2 id="auth-heading">Welcome to ArthaAI</h2>
+        <p id="auth-subheading">Intelligent financial planning & wealth intelligence</p>
+      </div>
+
+      <!-- Auth Error Notification Banner -->
+      <div id="auth-error-banner" class="auth-alert" style="display: none;"></div>
+
+      <!-- 1. Pinterest-Style: Continue with Google (Official accounts.google.com OAuth) -->
+      <button id="google-auth-btn" class="pinterest-google-btn" type="button" title="Sign in with your official Google Account">
+        <svg width="20" height="20" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <!-- Pinterest-Style Step 1: Email Form -->
+      <form id="auth-step-email" class="auth-form-step">
+        <div class="input-group">
+          <label for="auth-email-input">Email address</label>
+          <input
+            type="email"
+            id="auth-email-input"
+            placeholder="name@example.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+        <button type="submit" id="email-continue-btn" class="pinterest-primary-btn">
+          <span>Continue</span>
+        </button>
+      </form>
+
+      <!-- Pinterest-Style Step 2A: Password Login (Existing Account) -->
+      <form id="auth-step-login" class="auth-form-step" style="display: none;">
+        <div class="user-email-chip">
+          <span id="login-email-display">user@gmail.com</span>
+          <button type="button" id="edit-email-btn" class="chip-edit-link">Edit</button>
+        </div>
+
+        <div class="input-group">
+          <label for="auth-login-password">Password</label>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="auth-login-password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-login-password">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" id="login-submit-btn" class="pinterest-primary-btn">
+          <span>Log In</span>
+        </button>
+
+        <button type="button" class="auth-back-link" id="login-back-to-email-btn">
+          ← Back to email
+        </button>
+      </form>
+
+      <!-- Pinterest-Style Step 2B: Register (New Account) -->
+      <form id="auth-step-register" class="auth-form-step" style="display: none;">
+        <div class="register-welcome-note">
+          <span>No account found. Create a password to sign up with:</span>
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <strong id="register-email-display">user@gmail.com</strong>
+            <button type="button" id="edit-register-email-btn" class="chip-edit-link">Change</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="auth-register-name">Full name (optional)</label>
+          <input
+            type="text"
+            id="auth-register-name"
+            placeholder="e.g. Aarav Sharma"
+            autocomplete="name"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="auth-register-password">Create password (min 8 chars)</label>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="auth-register-password"
+              placeholder="At least 8 characters"
+              autocomplete="new-password"
+              required
+              minlength="8"
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-register-password">👁️</button>
+          </div>
+          <div class="password-strength-track">
+            <div id="password-strength-bar" class="strength-fill"></div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="auth-register-confirm">Confirm password</label>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="auth-register-confirm"
+              placeholder="Re-enter password"
+              autocomplete="new-password"
+              required
+              minlength="8"
+            />
+            <button type="button" class="toggle-password-btn" data-target="auth-register-confirm">👁️</button>
+          </div>
+        </div>
+
+        <button type="submit" id="register-submit-btn" class="pinterest-primary-btn">
+          <span>Create Account</span>
+        </button>
+
+        <button type="button" class="auth-back-link" id="register-back-to-email-btn">
+          ← Back to email
+        </button>
+      </form>
+
+      <div class="auth-footer-terms">
+        By continuing, you agree to ArthaAI's <span>Terms of Service</span> and acknowledge you've read our <span>Privacy Policy</span>. Protected by 256-bit encryption.
+      </div>
     </div>
   </div>
 

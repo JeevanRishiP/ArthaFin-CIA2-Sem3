@@ -89,8 +89,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const txDate = document.getElementById('tx-date');
   const saveTxBtn = document.getElementById('save-tx-btn');
 
-  // --- State Variables ---
-  const activeUserId = 1; // Primary active user ID (Rohan Sharma)
+  // --- DOM Elements: Authentication & User Profile ---
+  const headerLoginBtn = document.getElementById('header-login-btn');
+  const headerUserBadge = document.getElementById('header-user-badge');
+  const headerAvatar = document.getElementById('header-avatar');
+  const headerName = document.getElementById('header-name');
+  const sidebarGuestCard = document.getElementById('sidebar-guest-card');
+  const sidebarUserCard = document.getElementById('sidebar-user-card');
+  const sidebarUserAvatar = document.getElementById('sidebar-user-avatar');
+  const sidebarUserName = document.getElementById('sidebar-user-name');
+  const sidebarUserEmail = document.getElementById('sidebar-user-email');
+  const sidebarLoginTrigger = document.getElementById('sidebar-login-trigger');
+  const sidebarSignoutBtn = document.getElementById('sidebar-signout-btn');
+
+  const authModal = document.getElementById('auth-modal');
+  const authModalClose = document.getElementById('auth-modal-close');
+  const authErrorBanner = document.getElementById('auth-error-banner');
+  const googleAuthBtn = document.getElementById('google-auth-btn');
+
+  const authStepEmail = document.getElementById('auth-step-email');
+  const authEmailInput = document.getElementById('auth-email-input');
+  const emailContinueBtn = document.getElementById('email-continue-btn');
+
+  const authStepLogin = document.getElementById('auth-step-login');
+  const loginEmailDisplay = document.getElementById('login-email-display');
+  const editEmailBtn = document.getElementById('edit-email-btn');
+  const authLoginPassword = document.getElementById('auth-login-password');
+  const loginSubmitBtn = document.getElementById('login-submit-btn');
+  const loginBackToEmailBtn = document.getElementById('login-back-to-email-btn');
+
+  const authStepRegister = document.getElementById('auth-step-register');
+  const registerEmailDisplay = document.getElementById('register-email-display');
+  const editRegisterEmailBtn = document.getElementById('edit-register-email-btn');
+  const authRegisterName = document.getElementById('auth-register-name');
+  const authRegisterPassword = document.getElementById('auth-register-password');
+  const authRegisterConfirm = document.getElementById('auth-register-confirm');
+  const passwordStrengthBar = document.getElementById('password-strength-bar');
+  const registerSubmitBtn = document.getElementById('register-submit-btn');
+  const registerBackToEmailBtn = document.getElementById('register-back-to-email-btn');
+
+  // --- User & Session State ---
+  let currentUser = {
+    id: 1,
+    name: 'Rohan Sharma',
+    email: 'rohan.sharma@arthafin.ai',
+    avatar_url: '',
+    is_authenticated: false,
+  };
+
+  function getActiveUserId() {
+    return currentUser.id || 1;
+  }
+
   let activeSessionId = null; // Currently active conversation thread (null = fresh consultation)
   let currentTicker = '^NSEI';
   let isAwaitingResponse = false;
@@ -120,11 +170,343 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initializing ArthaAI Unified Intelligence System...');
     if (txDate) txDate.value = new Date().toISOString().split('T')[0];
 
+    // Hydrate existing user session if token is saved
+    await hydrateAuthSession();
+
     // 1. Load Past Conversation Sessions from PostgreSQL into Sidebar Locks
     await loadChatSessions();
 
     // 2. Pre-load Transaction Categories for Modal
     loadCategories();
+  }
+
+  // ==========================================================================
+  // AUTHENTICATION LOGIC (Pinterest-Style Dynamic Email + Real Google OAuth)
+  // ==========================================================================
+  function openAuthModal() {
+    if (!authModal) return;
+    authModal.style.display = 'flex';
+    goToAuthStep('email');
+    clearAuthError();
+    if (authEmailInput) {
+      authEmailInput.value = '';
+      setTimeout(() => authEmailInput.focus(), 100);
+    }
+  }
+
+  function closeAuthModal() {
+    if (authModal) authModal.style.display = 'none';
+    clearAuthError();
+  }
+
+  function setAuthError(msg) {
+    if (!authErrorBanner) return;
+    authErrorBanner.textContent = msg;
+    authErrorBanner.style.display = 'block';
+  }
+
+  function clearAuthError() {
+    if (!authErrorBanner) return;
+    authErrorBanner.textContent = '';
+    authErrorBanner.style.display = 'none';
+  }
+
+  function goToAuthStep(step) {
+    clearAuthError();
+    if (authStepEmail) authStepEmail.style.display = step === 'email' ? 'flex' : 'none';
+    if (authStepLogin) authStepLogin.style.display = step === 'login' ? 'flex' : 'none';
+    if (authStepRegister) authStepRegister.style.display = step === 'register' ? 'flex' : 'none';
+  }
+
+  function updateUserUIState(isLoggedIn) {
+    if (isLoggedIn) {
+      if (headerLoginBtn) headerLoginBtn.style.display = 'none';
+      if (headerUserBadge) headerUserBadge.style.display = 'flex';
+      if (headerAvatar) headerAvatar.textContent = (currentUser.name || 'U')[0].toUpperCase();
+      if (headerName) headerName.textContent = currentUser.name || 'User';
+
+      if (sidebarGuestCard) sidebarGuestCard.style.display = 'none';
+      if (sidebarUserCard) sidebarUserCard.style.display = 'flex';
+      if (sidebarUserAvatar) sidebarUserAvatar.textContent = (currentUser.name || 'U')[0].toUpperCase();
+      if (sidebarUserName) sidebarUserName.textContent = currentUser.name || 'User';
+      if (sidebarUserEmail) sidebarUserEmail.textContent = currentUser.email || '';
+    } else {
+      if (headerLoginBtn) headerLoginBtn.style.display = 'flex';
+      if (headerUserBadge) headerUserBadge.style.display = 'none';
+
+      if (sidebarGuestCard) sidebarGuestCard.style.display = 'flex';
+      if (sidebarUserCard) sidebarUserCard.style.display = 'none';
+    }
+  }
+
+  async function hydrateAuthSession() {
+    const token = localStorage.getItem('arthafin_token');
+    if (!token) {
+      updateUserUIState(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        currentUser = {
+          ...data.user,
+          is_authenticated: true,
+        };
+        updateUserUIState(true);
+      } else {
+        localStorage.removeItem('arthafin_token');
+        updateUserUIState(false);
+      }
+    } catch {
+      updateUserUIState(false);
+    }
+  }
+
+  // Password visibility toggle
+  document.querySelectorAll('.toggle-password-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🔒';
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+      }
+    });
+  });
+
+  // Password strength meter
+  if (authRegisterPassword && passwordStrengthBar) {
+    authRegisterPassword.addEventListener('input', () => {
+      const val = authRegisterPassword.value;
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const pct = (score / 4) * 100;
+      passwordStrengthBar.style.width = `${pct}%`;
+      if (score <= 1) passwordStrengthBar.style.backgroundColor = '#ef4444';
+      else if (score === 2) passwordStrengthBar.style.backgroundColor = '#f59e0b';
+      else if (score === 3) passwordStrengthBar.style.backgroundColor = '#38bdf8';
+      else passwordStrengthBar.style.backgroundColor = '#34d399';
+    });
+  }
+
+  // Real Google OAuth Button: Direct Authorization via accounts.google.com
+  if (googleAuthBtn) {
+    googleAuthBtn.addEventListener('click', () => {
+      clearAuthError();
+      const width = 500;
+      const height = 620;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      const popup = window.open(
+        '/api/auth/google/start',
+        'GoogleAccountsOAuth',
+        `width=${width},height=${height},top=${top},left=${left},status=no,toolbar=no,menubar=no`
+      );
+
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        window.location.href = '/api/auth/google/start';
+        return;
+      }
+
+      const pollTimer = setInterval(async () => {
+        if (!popup || popup.closed) {
+          clearInterval(pollTimer);
+          const token = localStorage.getItem('arthafin_token');
+          if (token && !currentUser.is_authenticated) {
+            await hydrateAuthSession();
+            closeAuthModal();
+            await loadChatSessions();
+            if (activeView === 'view-finance') loadFinanceData();
+          }
+        }
+      }, 500);
+    });
+  }
+
+  // Listen for Google Auth callback message from popup
+  window.addEventListener('message', async (event) => {
+    if (event.data && event.data.type === 'GOOGLE_AUTH_SUCCESS') {
+      const { token, user } = event.data;
+      if (token && user) {
+        localStorage.setItem('arthafin_token', token);
+        currentUser = { ...user, is_authenticated: true };
+        updateUserUIState(true);
+        closeAuthModal();
+        await loadChatSessions();
+        if (activeView === 'view-finance') loadFinanceData();
+      }
+    }
+  });
+
+  // Step 1: Check Email
+  if (authStepEmail) {
+    authStepEmail.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAuthError();
+      const email = authEmailInput?.value.trim().toLowerCase();
+      if (!email || !email.includes('@')) {
+        setAuthError('Please enter a valid email address.');
+        return;
+      }
+
+      try {
+        if (emailContinueBtn) emailContinueBtn.disabled = true;
+        const res = await fetch('/api/auth/check-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
+
+        if (data.user_exists) {
+          if (loginEmailDisplay) loginEmailDisplay.textContent = email;
+          if (authLoginPassword) authLoginPassword.value = '';
+          goToAuthStep('login');
+          setTimeout(() => authLoginPassword?.focus(), 100);
+        } else {
+          if (registerEmailDisplay) registerEmailDisplay.textContent = email;
+          if (authRegisterPassword) authRegisterPassword.value = '';
+          if (authRegisterConfirm) authRegisterConfirm.value = '';
+          goToAuthStep('register');
+          setTimeout(() => authRegisterPassword?.focus(), 100);
+        }
+      } catch {
+        setAuthError('Connection error. Please try again.');
+      } finally {
+        if (emailContinueBtn) emailContinueBtn.disabled = false;
+      }
+    });
+  }
+
+  // Step 2A: Password Login
+  if (authStepLogin) {
+    authStepLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAuthError();
+      const email = authEmailInput?.value.trim().toLowerCase();
+      const password = authLoginPassword?.value;
+
+      if (!password) {
+        setAuthError('Please enter your password.');
+        return;
+      }
+
+      try {
+        if (loginSubmitBtn) loginSubmitBtn.disabled = true;
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Invalid credentials.');
+        }
+
+        localStorage.setItem('arthafin_token', data.token);
+        currentUser = { ...data.user, is_authenticated: true };
+        updateUserUIState(true);
+        closeAuthModal();
+        await loadChatSessions();
+        if (activeView === 'view-finance') loadFinanceData();
+      } catch (err) {
+        setAuthError(err.message || 'Login failed.');
+      } finally {
+        if (loginSubmitBtn) loginSubmitBtn.disabled = false;
+      }
+    });
+  }
+
+  // Step 2B: Register New User
+  if (authStepRegister) {
+    authStepRegister.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAuthError();
+      const email = authEmailInput?.value.trim().toLowerCase();
+      const name = authRegisterName?.value.trim() || 'Valued User';
+      const password = authRegisterPassword?.value;
+      const confirmPassword = authRegisterConfirm?.value;
+
+      if (!password || password.length < 8) {
+        setAuthError('Password must be at least 8 characters long.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setAuthError('Passwords do not match. Please re-enter.');
+        return;
+      }
+
+      try {
+        if (registerSubmitBtn) registerSubmitBtn.disabled = true;
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to create account.');
+        }
+
+        localStorage.setItem('arthafin_token', data.token);
+        currentUser = { ...data.user, is_authenticated: true };
+        updateUserUIState(true);
+        closeAuthModal();
+        await loadChatSessions();
+        if (activeView === 'view-finance') loadFinanceData();
+      } catch (err) {
+        setAuthError(err.message || 'Registration failed.');
+      } finally {
+        if (registerSubmitBtn) registerSubmitBtn.disabled = false;
+      }
+    });
+  }
+
+  // Back to Email Navigation
+  if (editEmailBtn) editEmailBtn.addEventListener('click', () => goToAuthStep('email'));
+  if (loginBackToEmailBtn) loginBackToEmailBtn.addEventListener('click', () => goToAuthStep('email'));
+  if (editRegisterEmailBtn) editRegisterEmailBtn.addEventListener('click', () => goToAuthStep('email'));
+  if (registerBackToEmailBtn) registerBackToEmailBtn.addEventListener('click', () => goToAuthStep('email'));
+
+  // Auth Modal Triggers
+  if (headerLoginBtn) headerLoginBtn.addEventListener('click', openAuthModal);
+  if (sidebarLoginTrigger) sidebarLoginTrigger.addEventListener('click', openAuthModal);
+  if (authModalClose) authModalClose.addEventListener('click', closeAuthModal);
+  if (authModal) {
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) closeAuthModal();
+    });
+  }
+
+  // Sign out Trigger
+  if (sidebarSignoutBtn) {
+    sidebarSignoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('arthafin_token');
+      currentUser = {
+        id: 1,
+        name: 'Guest User',
+        email: 'guest@arthafin.ai',
+        avatar_url: '',
+        is_authenticated: false,
+      };
+      updateUserUIState(false);
+      openAuthModal();
+    });
   }
 
   // ==========================================================================
@@ -188,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   async function loadChatSessions() {
     try {
-      const res = await fetch(`/api/chat/sessions/${activeUserId}`);
+      const res = await fetch(`/api/chat/sessions/${getActiveUserId()}`);
       const data = await res.json();
 
       if (!data.success || !Array.isArray(data.sessions)) {
@@ -358,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      await fetch(`/api/chat/history/${activeUserId}`, { method: 'DELETE' });
+      await fetch(`/api/chat/history/${getActiveUserId()}`, { method: 'DELETE' });
       startNewConsultation();
       await loadChatSessions();
     } catch (err) {
@@ -406,7 +788,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: activeUserId,
+          user_id: getActiveUserId(),
           session_id: activeSessionId, // Links message strictly to current thread
           message: query,
         }),
@@ -760,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             date: dateVal,
           }
         : {
-            user_id: activeUserId,
+            user_id: getActiveUserId(),
             category_id: catId,
             amount: amountVal,
             description: desc,
@@ -795,7 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadFinanceData() {
     try {
-      const res = await fetch(`/api/finance/ledger/${activeUserId}`);
+      const res = await fetch(`/api/finance/ledger/${getActiveUserId()}`);
       const data = await res.json();
 
       if (!data.success || !data.ledger) return;

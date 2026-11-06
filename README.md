@@ -44,17 +44,36 @@ This project is configured with dedicated ports, containers, volumes, and networ
 
 ---
 
-## Features
+## The Three Core Features
 
-- **Apple VisionOS / Gemini / Claude Dark Glass UI**: Deep obsidian `#07090e` canvas with multi-layered atmospheric ambient glow, 28px blur glassmorphism, and a centered conversation stream inspired by Claude and Gemini.
-- **Pinterest-Style Intelligent Authentication**:
-  - **Continue with Google**: Triggers official Google Accounts OAuth popup (`accounts.google.com`) or account chooser.
-  - **Dynamic Email Check**: Input email -> checks database via `/api/auth/check-email`. If account exists, prompts for password to log in; if account does not exist, transitions directly to account creation with password confirmation and strength indicator.
-- **Production-Grade Security**: Passwords hashed with `bcryptjs` (12 salt rounds), signed HMAC SHA-256 JWT sessions (7-day validity), parameter-sanitized SQL queries preventing injection attacks, and strict email RFC validation.
-- **Google Gemini AI Engine**: Pure Google Gemini API (`gemini-3.5-flash-lite` via `@google/genai`) with zero Ollama dependencies.
-- **Relational Chat History**: Multi-turn conversation persistence in PostgreSQL with cascade constraints and query indexes.
-- **Context-Aware Responses**: Automatically appends the user's recent dialogue history to prompt payloads for seamless conversational continuity.
-- **Paise Precision Guardrails**: Intermediate calculations executed in integer paise ($1\text{ Rupee} = 100\text{ paise}$) before displaying formatted Rupee representations.
+ArthaAI is organized into **totally three core features**:
+
+### 1. Feature 1: Conversational AI Financial Advisory with Integer-Paise Precision
+- **Google Gemini 3.5 Flash Engine**: Direct cloud-native integration with Google Gemini (`gemini-3.5-flash-lite`) via the official `@google/genai` SDK.
+- **Integer Paise Precision**: Eliminates IEEE-754 floating-point errors by enforcing all calculations in integer paise ($1\text{ Rupee} = 100\text{ paise}$) before rendering formatted Indian Rupees (`₹`).
+- **Comprehensive Financial Advisory**: Budgeting (50/30/20 rule), loan eligibility (FOIR / CIBIL / EMI), equity compounding (SIP vs. direct stocks), and emergency fund strategies.
+- **Persistent Relational Memory**: Multi-turn conversation sessions saved to PostgreSQL with session switching, conversation reloading, and deletion.
+
+### 2. Feature 2: Real-Time Quantitative Stock Market Analysis & Prediction Engine (`TAEngine`)
+- **Algorithmic Technical Analysis**: Institutional indicators computed on Indian indices (Nifty 50 `^NSEI`).
+- **Trend & Crossover Detection**: 20 vs 50 SMA crossover identifying Golden Crosses and Death Crosses.
+- **Smart Money Concepts (SMC)**:
+  - **Break of Structure (BoS)**: Swing high/low breakthrough detection.
+  - **Fair Value Gaps (FVG)**: 3-candle imbalance scanning identifying unfilled institutional liquidity voids.
+  - **Point of Control (PoC)**: Volume profiling calculating high-liquidity price levels.
+- **AI-Powered Synthesis**: Injects quantitative indicators into Google Gemini for forward-looking market sentiment and key level analysis.
+
+### 3. Feature 3: Personal Finance Ledger & Pinterest-Style Dual Authentication
+- **Personal Finance Ledger**:
+  - Full income and expense tracking with category classification (Investments, Groceries, Housing, Discretionary, etc.).
+  - Automated discretionary spending leak detection highlighting high-leak categories (e.g., Food delivery, Entertainment).
+  - Interactive SVG Donut / Pie Chart visualizing category expense distributions with percentage breakdowns.
+- **Pinterest-Style Intelligent Dual Authentication**:
+  - **Real Google OAuth 2.0 Authorization**: Direct authorization against the official Google Accounts service (`https://accounts.google.com/o/oauth2/v2/auth`), completely eliminating any mock or sandbox screens.
+  - **Dynamic Email Check Flow**: Checks account existence via `/api/auth/check-email`:
+    - *Existing Account*: Reveals password entry for immediate authentication.
+    - *New Account*: Automatically guides user to registration with Full Name, password strength meter, and Confirm Password verification.
+  - **Production-Grade Security**: Passwords hashed with 12 salt rounds of `bcryptjs`, tamper-proof signed HMAC SHA-256 JWT sessions (7-day validity), and parameterized SQL preventing injection vulnerabilities.
 
 ---
 
