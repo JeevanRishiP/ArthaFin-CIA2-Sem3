@@ -51,14 +51,16 @@ app.use((_req: Request, res: Response) => {
   }
 });
 
-// Start Express server
-const server = app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(`🚀 Financial Chatbot Server listening on port ${PORT}`);
-  console.log(`🌐 Web UI: http://localhost:${PORT}`);
-  console.log(`📡 API Chat Endpoint: http://localhost:${PORT}/api/chat`);
-  console.log(`===============================================`);
-});
+// Start Express server locally (on Vercel, the app is exported as a serverless function)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(`🚀 Financial Chatbot Server listening on port ${PORT}`);
+    console.log(`🌐 Web UI: http://localhost:${PORT}`);
+    console.log(`📡 API Chat Endpoint: http://localhost:${PORT}/api/chat`);
+    console.log(`===============================================`);
+  });
+}
 
 export default app;
 
