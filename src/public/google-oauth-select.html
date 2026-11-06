@@ -172,11 +172,11 @@
     <p class="card-subtitle">to continue to <strong>ArthaAI</strong></p>
 
     <ul class="accounts-list">
-      <li class="account-item" onclick="selectGoogleAccount('Jeevan Rishi P', 'jeevan.rishi.p@gmail.com')">
+      <li class="account-item" onclick="selectGoogleAccount('Jeevan Rishi', 'jeevanrishi@gmail.com')">
         <div class="account-avatar">J</div>
         <div class="account-details">
-          <span class="account-name">Jeevan Rishi P</span>
-          <span class="account-email">jeevan.rishi.p@gmail.com</span>
+          <span class="account-name">Jeevan Rishi</span>
+          <span class="account-email">jeevanrishi@gmail.com</span>
         </div>
       </li>
 
@@ -230,22 +230,16 @@
 
         const data = await res.json();
         if (data.success && data.token) {
-          // Store token in localStorage immediately
-          localStorage.setItem('arthafin_token', data.token);
-          localStorage.setItem('arthafin_user', JSON.stringify(data.user));
-
           if (window.opener && !window.opener.closed) {
-            try {
-              window.opener.postMessage({
-                type: 'GOOGLE_AUTH_SUCCESS',
-                token: data.token,
-                user: data.user
-              }, '*');
-            } catch (e) {
-              console.warn('postMessage to opener failed:', e);
-            }
-            setTimeout(() => window.close(), 200);
+            window.opener.postMessage({
+              type: 'GOOGLE_AUTH_SUCCESS',
+              token: data.token,
+              user: data.user
+            }, window.location.origin);
+            window.close();
           } else {
+            localStorage.setItem('arthafin_auth_token', data.token);
+            localStorage.setItem('arthafin_user_profile', JSON.stringify(data.user));
             window.location.href = '/';
           }
         }

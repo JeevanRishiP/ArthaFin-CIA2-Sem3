@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc && mkdir -p dist/public && cp -r src/public/* dist/public/ && mkdir -p public && cp -r src/public/* public/ && mkdir -p dist/db/migrations && cp src/db/*.sql dist/db/ && cp -r src/db/migrations/* dist/db/migrations/",
+    "build": "tsc && mkdir -p dist/public && cp -r src/public/* dist/public/ && mkdir -p dist/db/migrations && cp src/db/*.sql dist/db/ && cp -r src/db/migrations/* dist/db/migrations/",
     "start": "node dist/server.js",
     "dev": "nodemon --watch src --ext ts,html,css,js --exec ts-node src/server.ts",
     "db:init": "ts-node src/db/migrate.ts",

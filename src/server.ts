@@ -21,13 +21,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Determine static assets directory (works both in development with ts-node and production dist)
 const primaryPublicDir = path.join(__dirname, 'public');
-const rootPublicDir = path.join(process.cwd(), 'public');
 const fallbackPublicDir = path.join(process.cwd(), 'src', 'public');
-const publicDir = fs.existsSync(primaryPublicDir)
-  ? primaryPublicDir
-  : fs.existsSync(rootPublicDir)
-    ? rootPublicDir
-    : fallbackPublicDir;
+const publicDir = fs.existsSync(primaryPublicDir) ? primaryPublicDir : fallbackPublicDir;
 
 app.use(express.static(publicDir));
 
@@ -56,16 +51,14 @@ app.use((_req: Request, res: Response) => {
   }
 });
 
-// Start Express server when running locally / stand-alone (skipped on Vercel Serverless Functions)
-if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`===============================================`);
-    console.log(`🚀 Financial Chatbot Server listening on port ${PORT}`);
-    console.log(`🌐 Web UI: http://localhost:${PORT}`);
-    console.log(`📡 API Chat Endpoint: http://localhost:${PORT}/api/chat`);
-    console.log(`===============================================`);
-  });
-}
+// Start Express server
+const server = app.listen(PORT, () => {
+  console.log(`===============================================`);
+  console.log(`🚀 Financial Chatbot Server listening on port ${PORT}`);
+  console.log(`🌐 Web UI: http://localhost:${PORT}`);
+  console.log(`📡 API Chat Endpoint: http://localhost:${PORT}/api/chat`);
+  console.log(`===============================================`);
+});
 
 export default app;
 
