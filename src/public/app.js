@@ -529,6 +529,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el) {
         if (viewId === targetViewId) {
           el.style.display = viewId === 'view-chat' ? 'flex' : 'block';
+          if (viewId === 'view-chat') {
+            el.style.flexDirection = 'column';
+            el.style.width = '100%';
+          }
           el.classList.add('active');
         } else {
           el.style.display = 'none';
@@ -649,8 +653,14 @@ document.addEventListener('DOMContentLoaded', () => {
       item.classList.toggle('active', item.getAttribute('data-session-id') === sessionId);
     });
 
+    if (welcomeCard) welcomeCard.style.display = 'none';
+    messagesContainer.innerHTML = '';
+    if (typingIndicator) {
+      messagesContainer.appendChild(typingIndicator);
+    }
+    setLoadingState(true);
+
     try {
-      setLoadingState(true);
       const res = await fetch(`/api/chat/sessions/${sessionId}/messages`);
       const data = await res.json();
 
@@ -688,6 +698,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear current chat container and show welcome card with middle suggestions
     messagesContainer.innerHTML = '';
     showWelcomeCard();
+    if (typingIndicator) {
+      typingIndicator.style.display = 'none';
+      messagesContainer.appendChild(typingIndicator);
+    }
     messageInput.value = '';
     messageInput.focus();
     console.log('✨ Started new consultation thread from zero.');
@@ -841,8 +855,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function setLoadingState(loading) {
     isAwaitingResponse = loading;
     sendBtn.disabled = loading;
-    typingIndicator.style.display = loading ? 'block' : 'none';
-    if (loading) scrollToBottom();
+    if (typingIndicator) {
+      typingIndicator.style.display = loading ? 'flex' : 'none';
+      if (loading) {
+        if (typingIndicator.parentNode !== messagesContainer) {
+          messagesContainer.appendChild(typingIndicator);
+        }
+        scrollToBottom();
+      }
+    }
   }
 
   // Append message envelope
@@ -874,7 +895,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     envelope.appendChild(header);
     envelope.appendChild(bubble);
-    messagesContainer.appendChild(envelope);
+
+    if (typingIndicator && typingIndicator.parentNode === messagesContainer) {
+      messagesContainer.insertBefore(envelope, typingIndicator);
+    } else {
+      messagesContainer.appendChild(envelope);
+    }
     scrollToBottom();
   }
 
