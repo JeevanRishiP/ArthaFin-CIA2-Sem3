@@ -1,8 +1,18 @@
 # ArthaAI — AI-Powered Financial Chatbot
 
+[![Live Deployment](https://img.shields.io/badge/Live%20Demo-arthafin.vercel.app-00dfa2?style=for-the-badge&logo=vercel)](https://arthafin.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-ArthaFin--CIA2--Sem3-blue?style=for-the-badge&logo=github)](https://github.com/JeevanRishiP/ArthaFin-CIA2-Sem3)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+> 🌐 **Live Web Application**: [https://arthafin.vercel.app](https://arthafin.vercel.app)  
+> 📦 **GitHub Repository**: [https://github.com/JeevanRishiP/ArthaFin-CIA2-Sem3.git](https://github.com/JeevanRishiP/ArthaFin-CIA2-Sem3.git)  
+> 🎓 **Academic Evaluation**: CIA-2 (Semester 3) • Full-Stack AI Engineering Deliverable
+
+---
+
 A production-grade, full-stack AI financial advisory platform built with **TypeScript**, **Node.js**, **Express.js**, **PostgreSQL**, and the **Google Gemini API** (`@google/genai`).
 
-Designed specifically to provide contextual, deterministic guidance on personal budgeting, loan eligibility (FOIR / CIBIL), equity compounding (SIP vs. stocks), emergency funds, and comprehensive financial roadmaps. Intermediate monetary calculations strictly use integer-paise precision to eliminate floating-point rounding errors in Indian Rupee (`₹`) transactions.
+Designed specifically to provide contextual, deterministic guidance on personal budgeting, loan eligibility (FOIR / CIBIL), equity compounding (SIP vs. stocks), emergency funds, and comprehensive financial roadmaps. Intermediate monetary calculations strictly use integer-paise precision to eliminate floating-point rounding errors in Indian Rupee (`₹`) transactions. Fully deployable on both local Dockerized stacks and serverless cloud architectures (Vercel).
 
 ---
 
@@ -122,6 +132,33 @@ npm run dev
 ```
 
 Visit **http://localhost:3020** in your web browser.
+
+---
+
+## Cloud Deployment (Vercel)
+
+The project is pre-configured for automated serverless deployment on [Vercel](https://vercel.com):
+
+* **Live URL**: [https://arthafin.vercel.app](https://arthafin.vercel.app)
+* **Configuration**: `vercel.json` and `api/index.js` automatically bridge the Express app into AWS Lambda / Vercel Serverless Functions.
+* **Cloud Resilience**: Even when a persistent PostgreSQL database instance is not connected in the cloud, ArthaAI features built-in in-memory fallback stores and deterministic reasoning engines across all three core modules, guaranteeing zero downtime.
+* **Environment Variables in Vercel Dashboard**:
+  * `GEMINI_API_KEY`: Your Google Gemini API key from [Google AI Studio](https://aistudio.google.com).
+  * `GEMINI_MODEL`: `gemini-3.5-flash-lite`
+  * `JWT_SECRET`: A secure random string for signing JWT tokens.
+  * `GOOGLE_CLIENT_ID`: (Optional) Your Google Cloud Console Client ID.
+  * `GOOGLE_CLIENT_SECRET`: (Optional) Your Google Cloud Console Client Secret.
+  * `APP_URL`: `https://arthafin.vercel.app`
+
+### Setting up Real Google OAuth 2.0 (Optional)
+To enable one-click Google Sign-in on either localhost or production:
+1. Open the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Create an **OAuth 2.0 Client ID** (Web Application).
+3. Add Authorized Redirect URIs:
+   * Local: `http://localhost:3020/api/auth/google/callback`
+   * Production: `https://arthafin.vercel.app/api/auth/google/callback`
+4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in your `.env` (or Vercel Environment Variables).
+5. *Note*: Even without Google Cloud Console credentials configured, users can instantly authenticate using the Pinterest-style email + password workflow, secured with 12-round bcrypt hashing and JWT tokens!
 
 ---
 

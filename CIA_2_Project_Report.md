@@ -5,6 +5,11 @@
 ## Project Title
 **AI-Powered Financial Chatbot (ArthaAI)**
 
+* **Live Cloud Deployment**: [https://arthafin.vercel.app](https://arthafin.vercel.app)
+* **GitHub Repository**: [https://github.com/JeevanRishiP/ArthaFin-CIA2-Sem3](https://github.com/JeevanRishiP/ArthaFin-CIA2-Sem3)
+* **Student / Author**: Jeevan Rishi P (`jeevan.rishi.p@gmail.com`)
+* **Evaluation**: CIA-2 (Semester 3) • Full-Stack AI Engineering
+
 ---
 
 ## 1. Introduction
@@ -135,14 +140,16 @@ The project is configured with dedicated ports, Docker containers, volumes, and 
 
 | Component | Technology | Role |
 | :--- | :--- | :--- |
+| **Live Web App** | Vercel Serverless Functions | Production deployment at `https://arthafin.vercel.app` |
 | **Language** | TypeScript 5.x | End-to-end static type safety and compilation |
 | **Runtime** | Node.js (v20+ ESNext) | High-performance asynchronous event-driven I/O |
 | **Server Framework** | Express.js 5.x | REST API routing, CORS handling, static asset serving |
 | **Database** | PostgreSQL 16+ | Relational data persistence, indexed chat history (Port 5435, Container: `arthafin_postgres`) |
+| **Cloud Fallback** | In-Memory Deterministic Stores | High-availability resilience when running in serverless environments |
 | **DB Client** | `pg` (node-postgres) | Connection pooling and parameterized query execution (`arthafin_db`) |
 | **LLM Inference** | Google Gemini API | Cloud-native natural language processing via `@google/genai` & REST API (`gemini-3.5-flash-lite`) |
 | **Authentication** | Google OAuth 2.0 + JWT + Bcrypt | Official Google authorization (`accounts.google.com`) + 12-round bcrypt hashing |
-| **Frontend** | HTML5 / CSS3 / Vanilla JS | Apple VisionOS glassmorphism responsive dark UI (Port 3020) |
+| **Frontend** | HTML5 / CSS3 / Vanilla JS | Apple VisionOS glassmorphism responsive dark UI (Port 3020 / Live on Vercel) |
 
 ---
 
